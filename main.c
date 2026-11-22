@@ -108,6 +108,13 @@ typedef struct __attribute__((packed)) {
 
   uint16_t dex;
   uint32_t steps;
+  uint32_t stardust;
+  uint32_t coins;
+  uint32_t captured;
+  uint32_t distance;
+  uint16_t quest_catches;
+  uint16_t quest_steps;
+  uint8_t quest_claimed;
 
   Creature party[PARTY_MAX];
 
@@ -265,6 +272,10 @@ static int message_id = 0;
 static int message_next = 1;
 
 static int evolution_happened = 0;
+static uint32_t world_clock = 0;
+static int world_weather = 0;
+
+static void show_message(int id, int next);
 
 /* =========================================================
    ECRANS
@@ -279,6 +290,8 @@ enum {
   SCREEN_PARTY,
   SCREEN_DEX,
   SCREEN_BAG,
+  SCREEN_QUESTS,
+  SCREEN_SHOP,
   SCREEN_MESSAGE
 };
 
@@ -375,7 +388,7 @@ static int active_creature(void) {
 
 static void save_game(void) {
   save_data.magic = 0x4352474Fu;
-  save_data.version = 1;
+  save_data.version = 2;
 
   save_data.world_x = (int16_t)player_x;
   save_data.world_y = (int16_t)player_y;
@@ -424,7 +437,7 @@ static bool load_game(void) {
   );
 
   if (candidate.magic != 0x4352474Fu ||
-      candidate.version != 1 ||
+      candidate.version != 2 ||
       candidate.party_count > PARTY_MAX ||
       stored_checksum != calculated) {
     return false;
@@ -455,6 +468,13 @@ static void new_game(void) {
   save_data.party_count = 1;
   save_data.balls = 10;
   save_data.potions = 5;
+  save_data.stardust = 300;
+  save_data.coins = 100;
+  save_data.captured = 0;
+  save_data.distance = 0;
+  save_data.quest_catches = 0;
+  save_data.quest_steps = 0;
+  save_data.quest_claimed = 0;
 
   save_data.party[0].species = 0;
   save_data.party[0].level = 5;
@@ -596,6 +616,9 @@ static void move_player(int dx, int dy) {
   player_y = ny;
 
   save_data.steps++;
+  save_data.quest_steps =
+    save_data.quest_steps < 100 ? (uint16_t)(save_data.quest_steps + 1) : 100;
+  save_data.distance++;
 
   if (rnd(100) < 13) {
     start_battle();
@@ -603,6 +626,9 @@ static void move_player(int dx, int dy) {
 }
 
 static void world_tick(uint64_t keys) {
+  world_clock = (world_clock + 1) & 719;
+  world_weather = (world_clock / 180) & 3;
+
   if (keys & KEY(eadk_key_left)) {
     move_player(-1, 0);
   } else if (keys & KEY(eadk_key_right)) {
@@ -612,6 +638,23 @@ static void world_tick(uint64_t keys) {
   } else if (keys & KEY(eadk_key_down)) {
     move_player(0, 1);
   }
+}
+
+static bool near_pokestop(void) {
+  int sx = 24 + ((world_weather * 17 + player_y) % 28);
+  int sy = 24 + ((world_weather * 13 + player_x) % 28);
+  return player_x >= sx - 2 && player_x <= sx + 2 &&
+         player_y >= sy - 2 && player_y <= sy + 2;
+}
+
+static void spin_pokestop(void) {
+  if (!near_pokestop()) return;
+  save_data.coins += 5;
+  save_data.balls += 3;
+  save_data.potions += 1;
+  save_data.stardust += 150;
+  save_game();
+  show_message(MSG_HEAL, SCREEN_WORLD);
 }
 
 /* =========================================================
@@ -651,6 +694,8 @@ static void battle_fight(void) {
 
   if (wild_hp <= 0) {
     evolution_happened = add_experience(c, 5);
+    save_data.stardust += 75 + wild_level * 10;
+    save_data.coins += 10;
 
     save_game();
 
@@ -699,6 +744,12 @@ static void battle_capture(void) {
     save_data.party[save_data.party_count++] = captured;
 
     register_creature(wild_species);
+    save_data.captured++;
+    save_data.quest_catches =
+      save_data.quest_catches < 100 ?
+      (uint16_t)(save_data.quest_catches + 1) : 100;
+    save_data.stardust += 100 + wild_level * 20;
+    save_data.coins += 3;
 
     save_game();
 
@@ -1110,6 +1161,21 @@ static void draw_world(void) {
     gfx_circle(270, 75, 3, C_BLUE, 256);
   }
 
+  /* PokéStop procedural: couronne bleue, anneau lumineux et balise. */
+  if (near_pokestop()) {
+    gfx_circle(160, 87, 32, HEX(0x55C4EA), 170);
+    gfx_circle(160, 87, 22, C_WHITE, 256);
+    gfx_rrect_outline(148, 75, 24, 24, 12, 3, C_BLUE, 256);
+    gfx_circle(160, 87, 5, C_BLUE, 256);
+  }
+
+  /* Météo et cycle jour/nuit. */
+  if (world_weather == 2) {
+    gfx_fill_alpha(0, HUD_H, SCREEN_W, SCREEN_H - HUD_H, HEX(0x6B91A8), 48);
+  } else if (world_weather == 3) {
+    gfx_fill_alpha(0, HUD_H, SCREEN_W, SCREEN_H - HUD_H, HEX(0x1B3048), 70);
+  }
+
   /* Personnage au centre. */
   gfx_circle(160, 126, 11, HEX(0x183B54), 256);
   gfx_circle(160, 123, 7, C_YELLOW, 256);
@@ -1439,6 +1505,7 @@ static void draw_bag(void) {
 
   panel(28, 52, 264, 48);
   panel(28, 110, 264, 48);
+  panel(28, 168, 264, 48);
 
   gfx_text(
     &np_font_body,
@@ -1487,6 +1554,25 @@ static void draw_bag(void) {
     256
   );
 
+  gfx_text(&np_font_body, 48, 194, "Poudre / Pieces",
+           C_WHITE, 256);
+  char resources[24];
+  resources[0] = '0';
+  if (save_data.stardust >= 1000) {
+    resources[0] = '1';
+    resources[1] = 'K';
+    resources[2] = '+';
+    resources[3] = 0;
+  } else {
+    resources[1] = '/';
+    resources[2] = ' ';
+    resources[3] = '0' + save_data.coins / 100;
+    resources[4] = '0' + (save_data.coins / 10) % 10;
+    resources[5] = '0' + save_data.coins % 10;
+    resources[6] = 0;
+  }
+  gfx_text_right(&np_font_body, 272, 194, resources, C_YELLOW, 256);
+
   gfx_text_center(
     &np_font_small,
     160,
@@ -1495,6 +1581,69 @@ static void draw_bag(void) {
     C_MUTED,
     256
   );
+}
+
+/* =========================================================
+   QUETES
+   ========================================================= */
+
+static void draw_quests(void) {
+  gfx_vgrad(0, 0, SCREEN_W, SCREEN_H, 0x162B42, 0x101B2B);
+  header("MISSIONS");
+
+  panel(18, 38, 284, 67);
+  gfx_text(&np_font_body, 30, 58, "Capturer 5 Pokemon", C_WHITE, 256);
+  gfx_fill(30, 69, 260, 7, C_DARK);
+  gfx_fill(30, 69, clamp(save_data.quest_catches * 260 / 5, 0, 260), 7,
+           C_GREEN);
+  gfx_text_right(&np_font_small, 290, 91,
+                 save_data.quest_catches >= 5 ? "Terminee" : "En cours",
+                 C_YELLOW, 256);
+
+  panel(18, 115, 284, 67);
+  gfx_text(&np_font_body, 30, 135, "Marcher 100 pas", C_WHITE, 256);
+  gfx_fill(30, 146, 260, 7, C_DARK);
+  gfx_fill(30, 146, clamp(save_data.quest_steps * 260 / 100, 0, 260), 7,
+           C_BLUE);
+  gfx_text_right(&np_font_small, 290, 168,
+                 save_data.quest_steps >= 100 ? "Terminee" : "En cours",
+                 C_YELLOW, 256);
+
+  if (!save_data.quest_claimed &&
+      save_data.quest_catches >= 5 &&
+      save_data.quest_steps >= 100) {
+    gfx_rrect(42, 195, 236, 30, 8, C_YELLOW, 256);
+    gfx_text_center(&np_font_body, 160, 215, "Recevoir 500 poudre",
+                     C_DARK, 256);
+  } else {
+    gfx_text_center(&np_font_small, 160, 210,
+                    save_data.quest_claimed ? "Recompense recue" : "Objectifs a completer",
+                    C_MUTED, 256);
+  }
+
+  gfx_text_center(&np_font_small, 160, 235, "Back: retour", C_MUTED, 256);
+}
+
+/* =========================================================
+   BOUTIQUE
+   ========================================================= */
+
+static void draw_shop(void) {
+  gfx_vgrad(0, 0, SCREEN_W, SCREEN_H, 0x162B42, 0x101B2B);
+  header("BOUTIQUE");
+
+  panel(18, 40, 284, 52);
+  choice(66, "10 capsules - 100 pieces", selection == 0);
+
+  panel(18, 102, 284, 52);
+  choice(128, "5 potions - 80 pieces", selection == 1);
+
+  panel(18, 164, 284, 52);
+  choice(190, "Pack explorateur - 200 pieces", selection == 2);
+
+  gfx_text_center(&np_font_small, 160, 235,
+                  save_data.coins >= 200 ? "Pieces disponibles: 200+" :
+                  "Acheter avec les pieces", C_MUTED, 256);
 }
 
 /* =========================================================
@@ -1507,7 +1656,7 @@ static void draw_pause(void) {
     0x102B40, 0x101B2B
   );
 
-  panel(64, 30, 192, 184);
+  panel(64, 30, 192, 202);
 
   gfx_text_center(
     &np_font_title,
@@ -1518,11 +1667,13 @@ static void draw_pause(void) {
     256
   );
 
-  choice(91, "Reprendre", selection == 0);
-  choice(119, "Equipe", selection == 1);
-  choice(147, "Pokedex", selection == 2);
-  choice(175, "Sac", selection == 3);
-  choice(203, "Quitter", selection == 4);
+  choice(82, "Reprendre", selection == 0);
+  choice(104, "Equipe", selection == 1);
+  choice(126, "Pokedex", selection == 2);
+  choice(148, "Sac", selection == 3);
+  choice(170, "Missions", selection == 4);
+  choice(192, "Boutique", selection == 5);
+  choice(214, "Quitter", selection == 6);
 }
 
 /* =========================================================
@@ -1644,6 +1795,14 @@ static void scene(void *ctx) {
       draw_bag();
       break;
 
+    case SCREEN_QUESTS:
+      draw_quests();
+      break;
+
+    case SCREEN_SHOP:
+      draw_shop();
+      break;
+
     case SCREEN_MESSAGE:
       draw_message();
       break;
@@ -1656,11 +1815,11 @@ static void scene(void *ctx) {
 
 static void pause_input(uint64_t hit) {
   if (hit & KEY(eadk_key_up)) {
-    selection = (selection + 4) % 5;
+    selection = (selection + 6) % 7;
   }
 
   if (hit & KEY(eadk_key_down)) {
-    selection = (selection + 1) % 5;
+    selection = (selection + 1) % 7;
   }
 
   if (hit & KEY(eadk_key_back)) {
@@ -1691,6 +1850,14 @@ static void pause_input(uint64_t hit) {
       break;
 
     case 4:
+      screen = SCREEN_QUESTS;
+      break;
+
+    case 5:
+      screen = SCREEN_SHOP;
+      break;
+
+    case 6:
       selection = 0;
       screen = SCREEN_CONFIRM;
       break;
@@ -1786,6 +1953,9 @@ int main(void) {
 
     /* EXPLORATION */
     else if (screen == SCREEN_WORLD) {
+      if (ok && near_pokestop()) {
+        spin_pokestop();
+      }
       if (back) {
         screen = SCREEN_PAUSE;
         selection = 0;
@@ -1811,11 +1981,47 @@ int main(void) {
     else if (
       screen == SCREEN_PARTY ||
       screen == SCREEN_DEX ||
-      screen == SCREEN_BAG
+      screen == SCREEN_BAG ||
+      screen == SCREEN_QUESTS ||
+      screen == SCREEN_SHOP
     ) {
       if (back) {
         screen = SCREEN_PAUSE;
         selection = 0;
+      }
+
+      if (screen == SCREEN_QUESTS && ok &&
+          !save_data.quest_claimed &&
+          save_data.quest_catches >= 5 &&
+          save_data.quest_steps >= 100) {
+        save_data.quest_claimed = 1;
+        save_data.stardust += 500;
+        save_data.coins += 50;
+        save_game();
+      }
+
+      if (screen == SCREEN_SHOP) {
+        if (hit & KEY(eadk_key_up)) {
+          selection = (selection + 2) % 3;
+        }
+        if (hit & KEY(eadk_key_down)) {
+          selection = (selection + 1) % 3;
+        }
+        if (ok) {
+          if (selection == 0 && save_data.coins >= 100) {
+            save_data.coins -= 100;
+            save_data.balls += 10;
+          } else if (selection == 1 && save_data.coins >= 80) {
+            save_data.coins -= 80;
+            save_data.potions += 5;
+          } else if (selection == 2 && save_data.coins >= 200) {
+            save_data.coins -= 200;
+            save_data.balls += 20;
+            save_data.potions += 10;
+            save_data.stardust += 1000;
+          }
+          save_game();
+        }
       }
     }
 

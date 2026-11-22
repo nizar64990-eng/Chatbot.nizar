@@ -42,5 +42,10 @@ La sauvegarde est stockee sous le nom `pokemongo.sav`.
 - Experience et evolutions
 - Equipe de six Pokemon maximum
 - Pokedex complet, sac, niveau, PV, XP et inventaire
+- Poudre et pieces de progression
+- Missions quotidiennes et recompenses
+- PokeStops proceduraux avec rotation d'inventaire
+- Boutique interne avec achats en pieces
+- Cycle jour/nuit et effets de meteo proceduraux
 - Graphismes vectoriels proceduraux avec ombres, reflexions et decor detaille
 - Sauvegarde locale avec verification par checksum
