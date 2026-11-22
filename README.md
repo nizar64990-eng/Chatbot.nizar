@@ -68,5 +68,5 @@ La sauvegarde est stockee sous le nom `pokemongo.sav`.
 - Atlas graphique intégrée de 151 sprites 128 × 128
 - 16 cartes-région intégrées pour la vue monde
 - Catalogues intégrés d'attaques, objets, quêtes, badges et personnages
-- Taille finale vérifiée entre 5,9 Mo et 6 Mo
+- Taille finale vérifiée à 6,141760 Mo, sous la limite de 6,2 Mo
 - Sauvegarde locale avec verification par checksum
