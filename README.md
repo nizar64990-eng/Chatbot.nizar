@@ -69,4 +69,5 @@ La sauvegarde est stockee sous le nom `pokemongo.sav`.
 - 16 cartes-région intégrées pour la vue monde
 - Catalogues intégrés d'attaques, objets, quêtes, badges et personnages
 - Taille finale vérifiée à 6,141760 Mo, sous la limite de 6,2 Mo
+- Icône de l'application inspirée d'Aureon
 - Sauvegarde locale avec verification par checksum
