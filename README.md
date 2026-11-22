@@ -64,4 +64,9 @@ La sauvegarde est stockee sous le nom `pokemongo.sav`.
 - Routes, recherches terrain et rencontres spéciales
 - Mode équipe, photographie, échanges bot et clubs
 - PV, niveaux, types, météo, saisons et progression hors ligne
+- Pokédex complet de 151 espèces originales ou génériques
+- Atlas graphique intégrée de 151 sprites 128 × 128
+- 16 cartes-région intégrées pour la vue monde
+- Catalogues intégrés d'attaques, objets, quêtes, badges et personnages
+- Taille finale vérifiée entre 5,9 Mo et 6 Mo
 - Sauvegarde locale avec verification par checksum

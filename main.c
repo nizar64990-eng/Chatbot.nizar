@@ -65,7 +65,7 @@ void np_push(int x, int y, int w, int h, const color_t *px) {
 #define TICK_MS 33
 
 #define PARTY_MAX 6
-#define SPECIES_COUNT 64
+#define SPECIES_COUNT 151
 
 #define WORLD_SIZE 256
 
@@ -107,7 +107,7 @@ typedef struct __attribute__((packed)) {
   int16_t world_x;
   int16_t world_y;
 
-  uint64_t dex;
+  uint32_t dex[5];
   uint32_t steps;
   uint32_t stardust;
   uint32_t coins;
@@ -541,6 +541,528 @@ static const Species species[SPECIES_COUNT] = {
     "Creature legendaire dorée",
     C_YELLOW,
     0, 0, 58, 20
+  },
+  {
+    "Alakazam",
+    "Esprit psy aux pouvoirs immenses",
+    C_PURPLE,
+    0, 0, 55, 21
+  },
+  {
+    "Machoc",
+    "Combattant musculeux",
+    C_MUTED,
+    65, 18, 37, 14
+  },
+  {
+    "Machopeur",
+    "Champion de puissance",
+    C_MUTED,
+    67, 28, 42, 17
+  },
+  {
+    "Mackogneur",
+    "Colosse des arts martiaux",
+    C_MUTED,
+    0, 0, 52, 20
+  },
+  {
+    "Chetiflor",
+    "Plante carnivore aggripante",
+    C_GREEN,
+    69, 12, 26, 8
+  },
+  {
+    "Boustiflor",
+    "Piege vivant des marais",
+    C_GREEN,
+    71, 21, 41, 13
+  },
+  {
+    "Empiflor",
+    "Predatrice des forets humides",
+    C_GREEN,
+    0, 0, 50, 16
+  },
+  {
+    "Tentacool",
+    "Meduse transparente",
+    C_BLUE,
+    73, 20, 30, 9
+  },
+  {
+    "Tentacruel",
+    "Creature des grands fonds",
+    C_PURPLE,
+    0, 0, 48, 15
+  },
+  {
+    "Racaillou",
+    "Pierre animee",
+    C_MUTED,
+    75, 25, 33, 10
+  },
+  {
+    "Gravalanch",
+    "Avalanche vivante",
+    C_MUTED,
+    77, 36, 43, 16
+  },
+  {
+    "Grolem",
+    "Armure rocheuse colossale",
+    C_MUTED,
+    0, 0, 52, 20
+  },
+  {
+    "Ponyta",
+    "Cheval des flames",
+    C_RED,
+    79, 30, 29, 12
+  },
+  {
+    "Galopa",
+    "Coursier volcanique",
+    C_RED,
+    0, 0, 44, 17
+  },
+  {
+    "Ramoloss",
+    "Paresse des rivages",
+    C_PURPLE,
+    81, 30, 32, 8
+  },
+  {
+    "Flagadoss",
+    "Gardien de la pause",
+    C_PURPLE,
+    0, 0, 48, 14
+  },
+  {
+    "Magneti",
+    "Aimant flottant",
+    C_MUTED,
+    83, 28, 30, 12
+  },
+  {
+    "Magneton",
+    "Trio magnetique",
+    C_MUTED,
+    0, 0, 45, 16
+  },
+  {
+    "Canarticho",
+    "Maître de la feuille",
+    C_MUTED,
+    0, 0, 34, 13
+  },
+  {
+    "Doduo",
+    "Couple a deux tetes",
+    C_MUTED,
+    86, 31, 31, 12
+  },
+  {
+    "Dodrio",
+    "Trio agile",
+    C_MUTED,
+    0, 0, 46, 18
+  },
+  {
+    "Otaria",
+    "Phoque des glaces",
+    C_BLUE,
+    88, 30, 32, 10
+  },
+  {
+    "Lamantine",
+    "Geant des mers froides",
+    C_BLUE,
+    0, 0, 49, 14
+  },
+  {
+    "Tadmorv",
+    "Monstre des decharges",
+    C_PURPLE,
+    90, 32, 35, 12
+  },
+  {
+    "Grotadmorv",
+    "Mare empoisonnée",
+    C_PURPLE,
+    0, 0, 52, 18
+  },
+  {
+    "Kokiyas",
+    "Coquillage profond",
+    C_BLUE,
+    92, 33, 28, 9
+  },
+  {
+    "Crustabri",
+    "Perle vivante",
+    C_BLUE,
+    0, 0, 44, 15
+  },
+  {
+    "Fantominus",
+    "Energie spectrale",
+    C_PURPLE,
+    94, 25, 27, 12
+  },
+  {
+    "Spectrum",
+    "Ombre errante",
+    C_PURPLE,
+    96, 36, 41, 16
+  },
+  {
+    "Ectoplasma",
+    "Esprit legend",
+    C_PURPLE,
+    0, 0, 49, 20
+  },
+  {
+    "Onix",
+    "Serpent de pierre",
+    C_MUTED,
+    0, 0, 39, 11
+  },
+  {
+    "Soporifik",
+    "Illusionneur endormi",
+    C_PURPLE,
+    99, 26, 30, 10
+  },
+  {
+    "Hypnomade",
+    "Maître des reves",
+    C_PURPLE,
+    0, 0, 44, 16
+  },
+  {
+    "Krabby",
+    "Crabe des plages",
+    C_RED,
+    101, 28, 27, 13
+  },
+  {
+    "Krabboss",
+    "Pinces titanesques",
+    C_RED,
+    0, 0, 43, 19
+  },
+  {
+    "Voltorbe",
+    "Sphère electrique",
+    C_RED,
+    103, 30, 24, 12
+  },
+  {
+    "Electrode",
+    "Orbe explosive",
+    C_RED,
+    0, 0, 39, 18
+  },
+  {
+    "Noeunoeuf",
+    "Essaim vegetal",
+    C_PURPLE,
+    105, 30, 31, 10
+  },
+  {
+    "Noadkoko",
+    "Foret consciente",
+    C_GREEN,
+    0, 0, 50, 17
+  },
+  {
+    "Osselait",
+    "Gardien des tombes",
+    C_MUTED,
+    107, 28, 27, 12
+  },
+  {
+    "Ossatueur",
+    "Os ancestral",
+    C_MUTED,
+    0, 0, 45, 18
+  },
+  {
+    "Kicklee",
+    "Combattant a longues jambes",
+    C_MUTED,
+    0, 0, 43, 19
+  },
+  {
+    "Tygnon",
+    "Boxeur invincible",
+    C_MUTED,
+    0, 0, 44, 18
+  },
+  {
+    "Excelangue",
+    "Langue géante",
+    C_PURPLE,
+    0, 0, 42, 11
+  },
+  {
+    "Smogo",
+    "Nuage toxique",
+    C_PURPLE,
+    113, 35, 30, 10
+  },
+  {
+    "Smogogo",
+    "Gaz empoisonne",
+    C_PURPLE,
+    0, 0, 46, 15
+  },
+  {
+    "Rhinocorne",
+    "Chargeur corné",
+    C_MUTED,
+    115, 42, 39, 17
+  },
+  {
+    "Rhinoferos",
+    "Tank vivant",
+    C_MUTED,
+    0, 0, 58, 22
+  },
+  {
+    "Leveinard",
+    "Soigneur du printemps",
+    C_WHITE,
+    0, 0, 49, 8
+  },
+  {
+    "Saquedeneu",
+    "Plante accrocheuse",
+    C_GREEN,
+    0, 0, 38, 16
+  },
+  {
+    "Kangourex",
+    "Protecteur maternel",
+    C_MUTED,
+    0, 0, 48, 17
+  },
+  {
+    "Hypotrempe",
+    "Cheval marin",
+    C_BLUE,
+    120, 32, 29, 11
+  },
+  {
+    "Hypocean",
+    "Dragon marin agile",
+    C_BLUE,
+    0, 0, 46, 17
+  },
+  {
+    "Poissirene",
+    "Poisson corne",
+    C_BLUE,
+    122, 33, 30, 12
+  },
+  {
+    "Poissoroy",
+    "Roi des courants",
+    C_PURPLE,
+    0, 0, 48, 18
+  },
+  {
+    "Stari",
+    "Etoile aquatique",
+    C_PURPLE,
+    124, 25, 27, 11
+  },
+  {
+    "Staross",
+    "Etoile des mers",
+    C_PURPLE,
+    0, 0, 43, 17
+  },
+  {
+    "Mime Mister",
+    "Pantomme mime",
+    C_PURPLE,
+    0, 0, 34, 14
+  },
+  {
+    "Insecateur",
+    "Lame des jardins",
+    C_GREEN,
+    0, 0, 42, 18
+  },
+  {
+    "Lippoutou",
+    "Danseuse des neiges",
+    C_PURPLE,
+    0, 0, 36, 13
+  },
+  {
+    "Elektek",
+    "Poing électrique",
+    C_YELLOW,
+    0, 0, 39, 18
+  },
+  {
+    "Magmar",
+    "Poing volcanique",
+    C_RED,
+    0, 0, 40, 18
+  },
+  {
+    "Scarabrute",
+    "Scarabée de combat",
+    C_MUTED,
+    0, 0, 44, 19
+  },
+  {
+    "Tauros",
+    "Taureau sauvage",
+    C_MUTED,
+    0, 0, 43, 18
+  },
+  {
+    "Magicarpe",
+    "Poisson fragile",
+    C_RED,
+    133, 20, 20, 5
+  },
+  {
+    "Leviator",
+    "Dragon des eaux",
+    C_BLUE,
+    0, 0, 60, 22
+  },
+  {
+    "Lokhlass",
+    "Voyageur des oceans",
+    C_BLUE,
+    0, 0, 65, 14
+  },
+  {
+    "Metamorph",
+    "Creature a mille formes",
+    C_PURPLE,
+    0, 0, 42, 12
+  },
+  {
+    "Evoli",
+    "Evolution instable",
+    C_MUTED,
+    136, 30, 31, 12
+  },
+  {
+    "Aquali",
+    "Evolution aquatique",
+    C_BLUE,
+    0, 0, 48, 15
+  },
+  {
+    "Voltali",
+    "Evolution electrique",
+    C_YELLOW,
+    0, 0, 48, 16
+  },
+  {
+    "Pyroli",
+    "Evolution flamboyante",
+    C_RED,
+    0, 0, 48, 17
+  },
+  {
+    "Porygon",
+    "Creation numerique",
+    C_PURPLE,
+    0, 0, 38, 13
+  },
+  {
+    "Amonita",
+    "Fossile ammonite",
+    C_BLUE,
+    142, 32, 32, 11
+  },
+  {
+    "Amonistar",
+    "Ancienne spirale",
+    C_BLUE,
+    0, 0, 49, 16
+  },
+  {
+    "Kabuto",
+    "Fossile corace",
+    C_MUTED,
+    144, 32, 31, 11
+  },
+  {
+    "Kabutops",
+    "Predateur fossile",
+    C_MUTED,
+    0, 0, 48, 18
+  },
+  {
+    "Ptera",
+    "Reptile volant antique",
+    C_MUTED,
+    0, 0, 52, 19
+  },
+  {
+    "Ronflex",
+    "Dormeur monumental",
+    C_MUTED,
+    0, 0, 68, 12
+  },
+  {
+    "Artikodin",
+    "Oiseau legendaire glace",
+    C_BLUE,
+    0, 0, 55, 18
+  },
+  {
+    "Electhor",
+    "Oiseau legendaire foudre",
+    C_YELLOW,
+    0, 0, 55, 19
+  },
+  {
+    "Sulfura",
+    "Oiseau legendaire feu",
+    C_RED,
+    0, 0, 55, 20
+  },
+  {
+    "Minidraco",
+    "Dragon reptilien",
+    C_BLUE,
+    149, 30, 34, 12
+  },
+  {
+    "Draco",
+    "Dragon novice",
+    C_BLUE,
+    151, 55, 44, 17
+  },
+  {
+    "Dracolosse",
+    "Dragon legendaire",
+    C_BLUE,
+    0, 0, 58, 23
+  },
+  {
+    "Mewtwo",
+    "Creation genetique supreme",
+    C_PURPLE,
+    0, 0, 62, 24
+  },
+  {
+    "Mew",
+    "Ancêtre mysterieux",
+    C_PURPLE,
+    0, 0, 58, 19
   }
 };
 
@@ -549,6 +1071,8 @@ static const Species species[SPECIES_COUNT] = {
    ========================================================= */
 
 static color_t strip[SCREEN_W * STRIP_H];
+
+extern const uint8_t game_data[];
 
 static SaveData save_data;
 
@@ -579,6 +1103,7 @@ static int enemy_status = 0;
 static int bot_selection = 0;
 static int battle_boost = 0;
 static int battle_boost_turns = 0;
+static int dex_page = 0;
 
 static void show_message(int id, int next);
 
@@ -734,7 +1259,7 @@ static int active_creature(void) {
 
 static void save_game(void) {
   save_data.magic = 0x4352474Fu;
-  save_data.version = 4;
+  save_data.version = 5;
 
   save_data.world_x = (int16_t)player_x;
   save_data.world_y = (int16_t)player_y;
@@ -783,7 +1308,7 @@ static bool load_game(void) {
   );
 
   if (candidate.magic != 0x4352474Fu ||
-      candidate.version != 4 ||
+      candidate.version != 5 ||
       candidate.party_count > PARTY_MAX ||
       stored_checksum != calculated) {
     return false;
@@ -812,6 +1337,7 @@ static void new_game(void) {
   save_data.seed =
     (uint32_t)eadk_timing_millis() ^ (uint32_t)rnd(0x7FFFFFFFu);
   seed = save_data.seed ? save_data.seed : 1u;
+  seed ^= (uint32_t)game_data[seed & 819199u];
   player_x = 16 + (int)(seed % 33);
   player_y = 16 + (int)((seed >> 8) % 33);
 
@@ -858,7 +1384,8 @@ static void new_game(void) {
   save_data.party[0].level = 5;
   save_data.party[0].xp = 0;
 
-  save_data.dex = 1;
+  for (int i = 0; i < 5; i++) save_data.dex[i] = 0;
+  save_data.dex[0] = 1;
 
   save_game();
 }
@@ -870,7 +1397,7 @@ static void new_game(void) {
 static void register_creature(int id) {
   if (id < 0 || id >= SPECIES_COUNT) return;
 
-  save_data.dex |= (uint64_t)1u << id;
+  save_data.dex[id >> 5] |= 1u << (id & 31);
 }
 
 /* =========================================================
@@ -1304,8 +1831,57 @@ static void battle_input(uint64_t hit) {
    DESSIN DES CREATURES
    ========================================================= */
 
+extern const uint16_t pokemon_atlas[];
+extern const uint16_t world_atlas[];
+extern const uint8_t game_data[];
+
+static void draw_atlas_creature(int id, int cx, int cy, int scale) {
+  if (!pokemon_atlas || id < 0 || id >= SPECIES_COUNT) return;
+
+  const int atlas_w = 128;
+  const int atlas_h = 128;
+  const int dw = 64 * scale;
+  const int dh = 64 * scale;
+  const int x0 = cx - dw / 2;
+  const int y0 = cy - dh / 2;
+  const uint16_t *sprite = pokemon_atlas + id * atlas_w * atlas_h;
+
+  for (int py = y0; py < y0 + dh; py++) {
+    if (py < gfx_y0 || py >= gfx_y1) continue;
+    int sy = (py - y0) * atlas_h / dh;
+    for (int px = x0; px < x0 + dw; px++) {
+      if (px < 0 || px >= SCREEN_W) continue;
+      int sx = (px - x0) * atlas_w / dw;
+      uint16_t pixel = sprite[sy * atlas_w + sx];
+      if (pixel != 0x0001u) {
+        gfx_buf[(py - gfx_y0) * SCREEN_W + px] = (color_t)pixel;
+      }
+    }
+  }
+}
+
+static void draw_world_thumbnail(int region, int x, int y) {
+  if (region < 0 || region >= 16) return;
+  const int sw = 128;
+  const int dw = 64;
+  const uint16_t *map = world_atlas + region * sw * sw;
+
+  for (int py = y; py < y + dw; py++) {
+    if (py < gfx_y0 || py >= gfx_y1) continue;
+    int sy = (py - y) * sw / dw;
+    for (int px = x; px < x + dw; px++) {
+      if (px < 0 || px >= SCREEN_W) continue;
+      int sx = (px - x) * sw / dw;
+      gfx_buf[(py - gfx_y0) * SCREEN_W + px] =
+        (color_t)map[sy * sw + sx];
+    }
+  }
+}
+
 static void draw_creature(int id, int x, int y, int scale) {
   if (id < 0 || id >= SPECIES_COUNT) return;
+  draw_atlas_creature(id, x, y, scale);
+  return;
 
   color_t c = species[id].color;
 
@@ -1644,6 +2220,8 @@ static void draw_world(void) {
     gfx_fill_alpha(0, HUD_H, SCREEN_W, SCREEN_H - HUD_H, HEX(0x1B3048), 70);
   }
 
+  draw_world_thumbnail(region_id(player_x, player_y), 248, 36);
+
   /* Personnage au centre. */
   gfx_circle(160, 126, 11, HEX(0x183B54), 256);
   gfx_circle(160, 123, 7, C_YELLOW, 256);
@@ -1899,7 +2477,7 @@ static void draw_party(void) {
     &np_font_small,
     160,
     235,
-    "Back: retour",
+    dex_page < 10 ? "Left/Right: pages   Back: retour" : "Derniere page   Back: retour",
     C_MUTED,
     256
   );
@@ -1917,21 +2495,27 @@ static void draw_dex(void) {
 
   header("POKEDEX");
 
-  for (int i = 0; i < SPECIES_COUNT; i++) {
-    int col = i % 8;
-    int row = i / 8;
+  int start = dex_page * 15;
+  if (start >= SPECIES_COUNT) start = 0;
+  dex_page = start / 15;
 
-    int x = 20 + col * 40;
-    int y = 48 + row * 24;
+  for (int slot = 0; slot < 15; slot++) {
+    int i = start + slot;
+    if (i >= SPECIES_COUNT) break;
+    int col = slot % 5;
+    int row = slot / 5;
+
+    int x = 32 + col * 64;
+    int y = 76 + row * 52;
 
     panel(
-      x - 16,
-      y - 15,
-      32,
-      31
+      x - 28,
+      y - 26,
+      56,
+      50
     );
 
-    if (save_data.dex & ((uint64_t)1u << i)) {
+    if (save_data.dex[i >> 5] & (1u << (i & 31))) {
       draw_creature(i, x, y - 5, 1);
 
       gfx_text_center(
@@ -2177,8 +2761,11 @@ static void draw_capabilities(void) {
     "Teracristal", "Gigamax", "Dynamax"
   };
   int active = active_creature();
-  int owned = active >= 0 ? save_data.dex &
-               ((uint64_t)1u << save_data.party[active].species) : 0;
+  int owned = 0;
+  if (active >= 0) {
+    int id = save_data.party[active].species;
+    owned = save_data.dex[id >> 5] & (1u << (id & 31));
+  }
   for (int i = 0; i < 10; i++) {
     int col = i % 2;
     int row = i / 2;
@@ -2907,6 +3494,15 @@ int main(void) {
       if (back) {
         screen = SCREEN_PAUSE;
         selection = 0;
+      }
+
+      if (screen == SCREEN_DEX) {
+        if (hit & KEY(eadk_key_left)) {
+          dex_page = (dex_page + 9) % 11;
+        }
+        if (hit & KEY(eadk_key_right)) {
+          dex_page = (dex_page + 1) % 11;
+        }
       }
     }
 
