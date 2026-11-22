@@ -65,7 +65,7 @@ void np_push(int x, int y, int w, int h, const color_t *px) {
 #define TICK_MS 33
 
 #define PARTY_MAX 6
-#define SPECIES_COUNT 8
+#define SPECIES_COUNT 16
 
 #define WORLD_SIZE 64
 
@@ -82,6 +82,7 @@ void np_push(int x, int y, int w, int h, const color_t *px) {
 #define C_RED      HEX(0xF06A70)
 #define C_PURPLE   HEX(0xB18AFF)
 #define C_DARK     HEX(0x0B1420)
+#define C_ORANGE   HEX(0xF39C4A)
 
 #define HUD_H 23
 
@@ -185,6 +186,54 @@ static const Species species[SPECIES_COUNT] = {
     "Titan des montagnes",
     C_YELLOW,
     0, 0, 45, 13
+  },
+  {
+    "Voltini",
+    "Petit messager de l'orage",
+    C_YELLOW,
+    9, 7, 21, 8
+  },
+  {
+    "Voltige",
+    "Seigneur des tempetes",
+    C_BLUE,
+    0, 0, 36, 13
+  },
+  {
+    "Aqualis",
+    "Sprite des lacs",
+    C_BLUE,
+    11, 9, 23, 7
+  },
+  {
+    "Nymphar",
+    "Gardienne des eaux profondes",
+    C_PURPLE,
+    0, 0, 40, 12
+  },
+  {
+    "Feulic",
+    "Renard des cendres",
+    C_RED,
+    13, 8, 24, 8
+  },
+  {
+    "Pyrocer",
+    "Garde-feu imperial",
+    C_ORANGE,
+    0, 0, 42, 14
+  },
+  {
+    "Mousain",
+    "Chene miniature",
+    C_GREEN,
+    15, 10, 22, 6
+  },
+  {
+    "Sylvieux",
+    "Esprit des forats anciens",
+    C_GREEN,
+    0, 0, 38, 12
   }
 };
 
@@ -469,11 +518,17 @@ static int terrain(int x, int y) {
   h *= 1274126177u;
   h ^= h >> 16;
 
-  int v = h % 20;
+  int v = h % 40;
 
-  if (v < 2) return 3;
-  if (v < 4) return 2;
-  if (v < 8) return 1;
+  /* Routes larges, quartiers urbains, eau, parc et montagnes. */
+  int road = ((x + 3) % 13 == 0) || ((y + 5) % 17 == 0);
+  int district = ((x / 8 + y / 8) & 1);
+
+  if (!road && v < 3) return 3;
+  if (!road && v < 7) return 2;
+  if (road) return 4;
+  if (district && v < 16) return 5;
+  if (v < 12) return 1;
 
   return 0;
 }
@@ -486,7 +541,7 @@ static bool blocked(int x, int y) {
 
   int t = terrain(x, y);
 
-  return t == 2 || t == 3;
+  return t == 2 || t == 3 || t == 5;
 }
 
 /* =========================================================
@@ -494,7 +549,14 @@ static bool blocked(int x, int y) {
    ========================================================= */
 
 static void start_battle(void) {
-  int id = (int)rnd(4) * 2;
+  int zone = terrain(player_x, player_y);
+  int id;
+
+  if (zone == 1) id = rnd(2) ? 4 : 5;
+  else if (zone == 2) id = rnd(2) ? 2 : 10;
+  else if (zone == 3) id = rnd(2) ? 6 : 7;
+  else if (zone == 4) id = 8 + (int)rnd(8);
+  else id = (int)rnd(SPECIES_COUNT);
 
   wild_hp = species[id].base_hp + 3 * (2 + rnd(5));
 
@@ -731,8 +793,18 @@ static void draw_creature(int id, int x, int y, int scale) {
 
   int r = 12 * scale;
 
+  gfx_circle(x + 2 * scale, y + r + 5 * scale, r + 4 * scale, HEX(0x0A2A32), 160);
   gfx_circle(x, y, r + 2, C_DARK, 256);
   gfx_circle(x, y, r, c, 256);
+
+  /* Reflet organique sur le corps. */
+  gfx_circle(
+    x - 5 * scale,
+    y - 7 * scale,
+    5 * scale,
+    gfx_mix(c, C_WHITE, 10),
+    180
+  );
 
   gfx_circle(
     x - 5 * scale,
@@ -813,6 +885,27 @@ static void draw_creature(int id, int x, int y, int scale) {
       C_MUTED
     );
   }
+
+  if (id >= 8 && id <= 9) {
+    gfx_circle(x - 10 * scale, y - 13 * scale, 3 * scale, C_YELLOW, 256);
+    gfx_circle(x + 10 * scale, y - 13 * scale, 3 * scale, C_YELLOW, 256);
+    gfx_fill(x - 2 * scale, y - 19 * scale, 4 * scale, 10 * scale, C_YELLOW);
+  }
+
+  if (id >= 10 && id <= 11) {
+    gfx_circle(x - 10 * scale, y - 10 * scale, 5 * scale, C_BLUE, 256);
+    gfx_circle(x + 10 * scale, y - 10 * scale, 5 * scale, C_BLUE, 256);
+  }
+
+  if (id >= 12 && id <= 13) {
+    gfx_rrect(x - 9 * scale, y - 20 * scale, 18 * scale, 7 * scale, 3 * scale, C_ORANGE, 256);
+    gfx_circle(x - 9 * scale, y - 17 * scale, 4 * scale, C_RED, 256);
+  }
+
+  if (id >= 14 && id <= 15) {
+    gfx_circle(x - 11 * scale, y - 14 * scale, 6 * scale, C_GREEN, 256);
+    gfx_circle(x + 11 * scale, y - 14 * scale, 6 * scale, C_GREEN, 256);
+  }
 }
 
 /* =========================================================
@@ -867,6 +960,13 @@ static void draw_title(void) {
     0, 0, SCREEN_W, SCREEN_H,
     0x102B40, 0x101B2B
   );
+
+  /* Logo, silhouette d'arene et atmosphere nocturne. */
+  for (int i = 0; i < 18; i++) {
+    int x = (i * 47 + 13) % SCREEN_W;
+    int y = 52 + ((i * 29) % 92);
+    gfx_circle(x, y, 1 + (i & 1), C_WHITE, 80);
+  }
 
   draw_creature(0, 160, 87, 2);
   draw_creature(2, 105, 119, 1);
@@ -935,29 +1035,49 @@ static void draw_world(void) {
         ground = HEX(0x477D52);
       } else if (t == 2) {
         ground = HEX(0x397CA2);
-      } else {
+      } else if (t == 3) {
         ground = HEX(0x596B72);
+      } else if (t == 4) {
+        ground = HEX(0xA2AAA7);
+      } else {
+        ground = HEX(0x8A8F82);
       }
 
       gfx_fill(px, py, tile_w, tile_h, ground);
+
+      if (t == 4) {
+        if (((tx + ty) & 1) == 0) {
+          gfx_fill(px + 2, py + 11, 22, 2, HEX(0xCBD1CE));
+        }
+        if (tx % 3 == 0) {
+          gfx_fill(px + 12, py, 2, 25, HEX(0xC3C9C6));
+        }
+      }
+
+      if (t == 5) {
+        gfx_rrect(px + 3, py + 3, 20, 19, 2, HEX(0x7A8580), 256);
+        gfx_rrect(px + 7, py + 7, 12, 10, 1, HEX(0xBFD5D5), 256);
+        gfx_fill(px + 11, py + 17, 4, 5, HEX(0x4A514F));
+      }
 
       if (t == 1) {
         gfx_circle(
           px + 7,
           py + 9,
-          2,
+          3,
           C_GREEN,
           256
         );
+        gfx_fill(px + 6, py + 11, 2, 7, HEX(0x234B3A));
       }
 
       if (t == 2) {
         gfx_fill(
-          px + 3,
+          px + ((ty * 7) % 9),
           py + 17,
-          20,
+          14,
           2,
-          C_BLUE
+          HEX(0x8ED0DF)
         );
       }
 
@@ -965,18 +1085,38 @@ static void draw_world(void) {
         gfx_circle(
           px + 13,
           py + 12,
-          8,
-          HEX(0x7A8A90),
+          9,
+          HEX(0x777F7C),
           256
         );
+        gfx_fill(px + 8, py + 8, 10, 3, HEX(0xAEB6B3));
       }
     }
   }
 
+  /* Pokeball markers and nearby wild Pokemon in the visible district. */
+  for (int i = 0; i < 3; i++) {
+    int mx = 70 + i * 96 + (int)(player_x % 3) * 5;
+    int my = 78 + ((i * 43 + player_y) % 74);
+    int species_id = (player_x + player_y * 3 + i * 5) % SPECIES_COUNT;
+
+    gfx_circle(mx, my + 15, 13, HEX(0xAFC7C0), 100);
+    draw_creature(species_id, mx, my, 1);
+  }
+
+  if (((player_x + player_y) & 3) == 0) {
+    gfx_rrect(258, 63, 24, 24, 12, C_BLUE, 256);
+    gfx_rrect(263, 68, 14, 14, 7, C_WHITE, 256);
+    gfx_circle(270, 75, 3, C_BLUE, 256);
+  }
+
   /* Personnage au centre. */
-  gfx_circle(160, 126, 9, C_YELLOW, 256);
-  gfx_circle(160, 123, 4, C_WHITE, 256);
-  gfx_fill(156, 130, 8, 8, C_BLUE);
+  gfx_circle(160, 126, 11, HEX(0x183B54), 256);
+  gfx_circle(160, 123, 7, C_YELLOW, 256);
+  gfx_circle(160, 120, 3, C_WHITE, 256);
+  gfx_fill(156, 128, 8, 11, C_BLUE);
+  gfx_fill(158, 138, 3, 5, C_DARK);
+  gfx_fill(164, 138, 3, 5, C_DARK);
 
   header("POKEMON GO");
 
@@ -984,7 +1124,7 @@ static void draw_world(void) {
     &np_font_small,
     8,
     237,
-    "Arrows: move",
+    "Deplacer",
     C_WHITE,
     256
   );
@@ -993,7 +1133,7 @@ static void draw_world(void) {
     &np_font_small,
     312,
     237,
-    "Back: menu",
+    "Menu",
     C_WHITE,
     256
   );
@@ -1009,6 +1149,16 @@ static void draw_battle(void) {
     0x294F65, 0x152A3E
   );
 
+  /* Ciel, horizon et terrain de combat stylise 3D. */
+  gfx_vgrad(0, 23, SCREEN_W, 175, 0x77BDB0, 0x2E6D67);
+  gfx_rrect(0, 160, 320, 17, 8, HEX(0x315844), 256);
+  for (int i = 0; i < 12; i++) {
+    int x = i * 31 - ((player_x * 3) % 31);
+    gfx_fill(x, 151 - (i & 3) * 3, 24, 3, HEX(0x72A28D));
+  }
+
+  gfx_circle(240, 94, 49, HEX(0x355F58), 220);
+  gfx_circle(83, 155, 43, HEX(0x355F58), 220);
   gfx_circle(
     240, 94, 43,
     HEX(0x47765D),
@@ -1221,17 +1371,17 @@ static void draw_dex(void) {
   header("POKEDEX");
 
   for (int i = 0; i < SPECIES_COUNT; i++) {
-    int col = i % 4;
-    int row = i / 4;
+    int col = i % 5;
+    int row = i / 5;
 
-    int x = 42 + col * 78;
-    int y = 83 + row * 91;
+    int x = 32 + col * 64;
+    int y = 62 + row * 55;
 
     panel(
-      x - 32,
-      y - 34,
-      64,
-      76
+      x - 28,
+      y - 23,
+      56,
+      48
     );
 
     if (save_data.dex & (1u << i)) {

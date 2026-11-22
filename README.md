@@ -34,10 +34,13 @@ La sauvegarde est stockee sous le nom `pokemongo.sav`.
 
 ## Fonctionnalites
 
-- Carte procedurale et deplacement sur grille
-- Rencontres sauvages aleatoires
+- Monde procedural avec routes, eau, montagnes, quartiers urbains et parcs
+- 16 Pokemon originaux et Pokedex detaille
+- Pokemon visibles dans les zones explorees
+- Rencontres sauvages adaptees au biome
 - Combats, captures, potions et fuite
 - Experience et evolutions
 - Equipe de six Pokemon maximum
-- Pokedex et inventaire
+- Pokedex complet, sac, niveau, PV, XP et inventaire
+- Graphismes vectoriels proceduraux avec ombres, reflexions et decor detaille
 - Sauvegarde locale avec verification par checksum
