@@ -48,4 +48,14 @@ La sauvegarde est stockee sous le nom `pokemongo.sav`.
 - Boutique interne avec achats en pieces
 - Cycle jour/nuit et effets de meteo proceduraux
 - Graphismes vectoriels proceduraux avec ombres, reflexions et decor detaille
+- 256x256 cases procedurales reparties en 16 regions
+- Nouveau depart avec seed aleatoire par partie
+- Pokedex regional de 64 Pokemon, informations verrouillees avant capture
+- Niveau joueur, XP, Pokedollars et recompenses de quetes
+- Profil, pseudos, skins et personnalisation des Pokeballs
+- Duellistes diriges par des bots
+- Brulure, sommeil, poison, paralysie, resistances et faiblesses
+- Capacites X, Y, Z, V, VMAX, EX, Mega EX, Teracristal, Gigamax et Dynamax
+- Centres Pokemon, magasins, villes, PokeStops, baies et potions
+- Badges de captures et d'arènes
 - Sauvegarde locale avec verification par checksum

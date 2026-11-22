@@ -65,9 +65,9 @@ void np_push(int x, int y, int w, int h, const color_t *px) {
 #define TICK_MS 33
 
 #define PARTY_MAX 6
-#define SPECIES_COUNT 16
+#define SPECIES_COUNT 64
 
-#define WORLD_SIZE 64
+#define WORLD_SIZE 256
 
 #define SAVE_NAME "creaturego.sav"
 
@@ -94,6 +94,7 @@ typedef struct __attribute__((packed)) {
   uint8_t species;
   uint8_t level;
   uint8_t xp;
+  uint8_t status;
 } Creature;
 
 typedef struct __attribute__((packed)) {
@@ -106,7 +107,7 @@ typedef struct __attribute__((packed)) {
   int16_t world_x;
   int16_t world_y;
 
-  uint16_t dex;
+  uint64_t dex;
   uint32_t steps;
   uint32_t stardust;
   uint32_t coins;
@@ -115,6 +116,16 @@ typedef struct __attribute__((packed)) {
   uint16_t quest_catches;
   uint16_t quest_steps;
   uint8_t quest_claimed;
+  uint32_t seed;
+  uint32_t player_xp;
+  uint16_t player_level;
+  uint32_t pokedollars;
+  uint8_t ball_style;
+  uint8_t skin_style;
+  uint8_t berries;
+  uint16_t badges;
+  uint16_t bot_wins;
+  char nickname[12];
 
   Creature party[PARTY_MAX];
 
@@ -241,6 +252,282 @@ static const Species species[SPECIES_COUNT] = {
     "Esprit des forats anciens",
     C_GREEN,
     0, 0, 38, 12
+  },
+  {
+    "Gelice",
+    "Eclat des sommets geles",
+    C_BLUE,
+    17, 12, 27, 8
+  },
+  {
+    "Polacore",
+    "Garde des glaciers",
+    C_WHITE,
+    0, 0, 43, 13
+  },
+  {
+    "Nebulox",
+    "Gardien du ciel nocturne",
+    C_PURPLE,
+    19, 14, 31, 10
+  },
+  {
+    "Astralion",
+    "Messager des etoiles",
+    C_YELLOW,
+    0, 0, 48, 15
+  },
+  {
+    "Bambrou",
+    "Petit panda des bambous",
+    C_GREEN,
+    21, 11, 26, 7
+  },
+  {
+    "Bamborix",
+    "Protecteur des forets sacrées",
+    C_YELLOW,
+    0, 0, 41, 13
+  },
+  {
+    "Mirmouche",
+    "Larve miniature des forets",
+    C_GREEN,
+    23, 8, 20, 5
+  },
+  {
+    "Phalynx",
+    "Papillon aux ailes luminescentes",
+    C_PURPLE,
+    0, 0, 35, 11
+  },
+  {
+    "Lumosel",
+    "Graine brillante du matin",
+    C_YELLOW,
+    25, 10, 24, 7
+  },
+  {
+    "Helios",
+    "Lion solaire",
+    C_RED,
+    0, 0, 44, 14
+  },
+  {
+    "Umbron",
+    "Renard des ombres",
+    C_PURPLE,
+    27, 12, 25, 9
+  },
+  {
+    "Nyctera",
+    "Chasseur nocturne",
+    C_BLUE,
+    0, 0, 43, 14
+  },
+  {
+    "Terrapin",
+    "Tortue des dunes",
+    C_MUTED,
+    29, 13, 29, 8
+  },
+  {
+    "Dunadar",
+    "Seigneur du desert",
+    C_ORANGE,
+    0, 0, 47, 15
+  },
+  {
+    "Cobaltin",
+    "Alliage vivant",
+    C_BLUE,
+    31, 16, 33, 12
+  },
+  {
+    "Cobaltron",
+    "Golem mecanique",
+    C_MUTED,
+    0, 0, 51, 17
+  },
+  {
+    "Mycélia",
+    "Fée champignon",
+    C_PURPLE,
+    33, 14, 28, 9
+  },
+  {
+    "Sporyon",
+    "Ancien de la foret",
+    C_GREEN,
+    0, 0, 46, 14
+  },
+  {
+    "Carapluie",
+    "Crabe des marées",
+    C_BLUE,
+    35, 11, 30, 10
+  },
+  {
+    "Tidalord",
+    "Titan des abysses",
+    C_PURPLE,
+    0, 0, 49, 16
+  },
+  {
+    "Arcélix",
+    "Serpent d'or",
+    C_YELLOW,
+    37, 15, 32, 11
+  },
+  {
+    "Dracelion",
+    "Dragon royal",
+    C_RED,
+    0, 0, 52, 18
+  },
+  {
+    "Brumelle",
+    "Papillon des nuages",
+    C_WHITE,
+    39, 12, 26, 8
+  },
+  {
+    "Tempestra",
+    "Fée des orages",
+    C_BLUE,
+    0, 0, 45, 15
+  },
+  {
+    "Vaporys",
+    "Esprit de vapeur",
+    C_BLUE,
+    41, 13, 27, 9
+  },
+  {
+    "Fumadora",
+    "Machine a vapeur vivante",
+    C_MUTED,
+    0, 0, 44, 14
+  },
+  {
+    "Luminiche",
+    "Petit poisson lumineux",
+    C_YELLOW,
+    43, 10, 23, 7
+  },
+  {
+    "Eclatide",
+    "Poisson des profondeurs",
+    C_BLUE,
+    0, 0, 42, 13
+  },
+  {
+    "Sablette",
+    "Esprit du sable",
+    C_ORANGE,
+    45, 14, 30, 9
+  },
+  {
+    "Dunese",
+    "Garde des dunes",
+    C_YELLOW,
+    0, 0, 48, 16
+  },
+  {
+    "Cendrel",
+    "Aigle de cendre",
+    C_RED,
+    47, 15, 31, 12
+  },
+  {
+    "Vulcarn",
+    "Oiseau volcanique",
+    C_ORANGE,
+    0, 0, 50, 17
+  },
+  {
+    "Glacipin",
+    "Pingouin cristallin",
+    C_BLUE,
+    49, 12, 29, 9
+  },
+  {
+    "Abyssorin",
+    "Empereur des glaces",
+    C_WHITE,
+    0, 0, 49, 16
+  },
+  {
+    "Sourisole",
+    "Coureur des champs",
+    C_MUTED,
+    51, 10, 24, 8
+  },
+  {
+    "Quickora",
+    "L'animal le plus vif",
+    C_YELLOW,
+    0, 0, 39, 13
+  },
+  {
+    "Cirelune",
+    "Oiseau lunaire",
+    C_WHITE,
+    53, 15, 32, 10
+  },
+  {
+    "Selenera",
+    "Gardienne des cycles",
+    C_PURPLE,
+    0, 0, 53, 18
+  },
+  {
+    "Rocaille",
+    "Caillou anime",
+    C_MUTED,
+    55, 11, 31, 9
+  },
+  {
+    "Titanite",
+    "Colosse naturel",
+    C_ORANGE,
+    0, 0, 54, 18
+  },
+  {
+    "Fleurose",
+    "Fleur des prairies",
+    C_GREEN,
+    57, 12, 27, 8
+  },
+  {
+    "Rosalithe",
+    "Rose petrifiee",
+    C_PURPLE,
+    0, 0, 46, 14
+  },
+  {
+    "Elekido",
+    "Jeune gardien electrique",
+    C_YELLOW,
+    59, 13, 28, 11
+  },
+  {
+    "Electar",
+    "Bete de la foudre",
+    C_BLUE,
+    0, 0, 48, 16
+  },
+  {
+    "Kokoon",
+    "Cocon vegetal",
+    C_GREEN,
+    61, 14, 29, 8
+  },
+  {
+    "Aureon",
+    "Creature legendaire dorée",
+    C_YELLOW,
+    0, 0, 58, 20
   }
 };
 
@@ -274,6 +561,11 @@ static int message_next = 1;
 static int evolution_happened = 0;
 static uint32_t world_clock = 0;
 static int world_weather = 0;
+static int combat_status = 0;
+static int enemy_status = 0;
+static int bot_selection = 0;
+static int battle_boost = 0;
+static int battle_boost_turns = 0;
 
 static void show_message(int id, int next);
 
@@ -292,6 +584,10 @@ enum {
   SCREEN_BAG,
   SCREEN_QUESTS,
   SCREEN_SHOP,
+  SCREEN_PROFILE,
+  SCREEN_BADGES,
+  SCREEN_BOTS,
+  SCREEN_CAPABILITIES,
   SCREEN_MESSAGE
 };
 
@@ -327,6 +623,14 @@ static const char *messages[] = {
   "Ton equipe est fatiguee."
 };
 
+enum {
+  STATUS_OK,
+  STATUS_BURN,
+  STATUS_SLEEP,
+  STATUS_POISON,
+  STATUS_PARALYSIS
+};
+
 /* =========================================================
    OUTILS
    ========================================================= */
@@ -343,6 +647,26 @@ static int clamp(int v, int min, int max) {
   if (v < min) return min;
   if (v > max) return max;
   return v;
+}
+
+static int species_type(int id) {
+  if (id < 0 || id >= SPECIES_COUNT) return 0;
+  if (id % 8 == 0 || id % 8 == 1) return 1; /* feu */
+  if (id % 8 == 2 || id % 8 == 3) return 2; /* eau */
+  if (id % 8 == 4 || id % 8 == 5) return 3; /* plante */
+  if (id % 8 == 6 || id % 8 == 7) return 4; /* roche */
+  return 0;
+}
+
+static int type_multiplier(int attack_type, int defender_type) {
+  if (attack_type == 1 && defender_type == 3) return 160;
+  if (attack_type == 1 && defender_type == 2) return 50;
+  if (attack_type == 2 && defender_type == 1) return 160;
+  if (attack_type == 2 && defender_type == 4) return 160;
+  if (attack_type == 3 && defender_type == 2) return 160;
+  if (attack_type == 3 && defender_type == 1) return 50;
+  if (attack_type == 4 && defender_type == 1) return 50;
+  return 100;
 }
 
 static uint32_t hash_bytes(const uint8_t *data, uint32_t len) {
@@ -388,7 +712,7 @@ static int active_creature(void) {
 
 static void save_game(void) {
   save_data.magic = 0x4352474Fu;
-  save_data.version = 2;
+  save_data.version = 3;
 
   save_data.world_x = (int16_t)player_x;
   save_data.world_y = (int16_t)player_y;
@@ -437,7 +761,7 @@ static bool load_game(void) {
   );
 
   if (candidate.magic != 0x4352474Fu ||
-      candidate.version != 2 ||
+      candidate.version != 3 ||
       candidate.party_count > PARTY_MAX ||
       stored_checksum != calculated) {
     return false;
@@ -452,6 +776,7 @@ static bool load_game(void) {
 
   save_data = candidate;
   save_data.checksum = stored_checksum;
+  seed = save_data.seed ? save_data.seed : 1u;
 
   player_x = clamp(candidate.world_x, 0, WORLD_SIZE - 1);
   player_y = clamp(candidate.world_y, 0, WORLD_SIZE - 1);
@@ -462,8 +787,11 @@ static bool load_game(void) {
 static void new_game(void) {
   clear_bytes(&save_data, sizeof(save_data));
 
-  player_x = 32;
-  player_y = 32;
+  save_data.seed =
+    (uint32_t)eadk_timing_millis() ^ (uint32_t)rnd(0x7FFFFFFFu);
+  seed = save_data.seed ? save_data.seed : 1u;
+  player_x = 16 + (int)(seed % 33);
+  player_y = 16 + (int)((seed >> 8) % 33);
 
   save_data.party_count = 1;
   save_data.balls = 10;
@@ -475,6 +803,21 @@ static void new_game(void) {
   save_data.quest_catches = 0;
   save_data.quest_steps = 0;
   save_data.quest_claimed = 0;
+  save_data.berries = 5;
+  save_data.player_xp = 0;
+  save_data.player_level = 1;
+  save_data.pokedollars = 500;
+  save_data.ball_style = 0;
+  save_data.skin_style = 0;
+  save_data.badges = 0;
+  save_data.bot_wins = 0;
+  save_data.nickname[0] = 'J';
+  save_data.nickname[1] = 'o';
+  save_data.nickname[2] = 'u';
+  save_data.nickname[3] = 'e';
+  save_data.nickname[4] = 'u';
+  save_data.nickname[5] = 'r';
+  save_data.nickname[6] = 0;
 
   save_data.party[0].species = 0;
   save_data.party[0].level = 5;
@@ -492,7 +835,7 @@ static void new_game(void) {
 static void register_creature(int id) {
   if (id < 0 || id >= SPECIES_COUNT) return;
 
-  save_data.dex |= (uint16_t)(1u << id);
+  save_data.dex |= (uint64_t)1u << id;
 }
 
 /* =========================================================
@@ -525,12 +868,22 @@ static bool add_experience(Creature *c, int amount) {
   return false;
 }
 
+static void add_player_experience(uint32_t amount) {
+  save_data.player_xp += amount;
+  while (save_data.player_xp >= save_data.player_level * 100u) {
+    save_data.player_xp -= save_data.player_level * 100u;
+    save_data.player_level++;
+    save_data.pokedollars += 250u;
+  }
+}
+
 /* =========================================================
    CARTE ET TERRAIN
    ========================================================= */
 
 static int terrain(int x, int y) {
   uint32_t h =
+    save_data.seed ^
     (uint32_t)(x * 73856093u) ^
     (uint32_t)(y * 19349663u);
 
@@ -564,6 +917,23 @@ static bool blocked(int x, int y) {
   return t == 2 || t == 3 || t == 5;
 }
 
+static int region_id(int x, int y) {
+  int rx = x / 64;
+  int ry = y / 64;
+  return rx + ry * 4;
+}
+
+static const char *region_name(int r) {
+  static const char *names[16] = {
+    "Luminosa", "Flavora", "Aqualis", "Rochelle",
+    "Sylvana", "Voltoria", "Glacialis", "Nebulosa",
+    "Cendral", "Dunélia", "Myrtille", "Terralys",
+    "Carapagos", "Solaris", "Nyxoria", "Aurelia"
+  };
+  if (r < 0 || r >= 16) return "Region inconnue";
+  return names[r];
+}
+
 /* =========================================================
    RENCONTRES
    ========================================================= */
@@ -592,12 +962,14 @@ static void start_battle(void) {
   player_hp = creature_max_hp(c);
 
   battle_selection = 0;
+  combat_status = STATUS_OK;
+  enemy_status = STATUS_OK;
+  battle_boost = 0;
+  battle_boost_turns = 0;
 
   /* Stocke la creature sauvage dans une variable temporaire. */
   wild_species = id;
   wild_level = 2 + rnd(5);
-
-  register_creature(id);
 
   screen = SCREEN_BATTLE;
 }
@@ -668,7 +1040,19 @@ static void show_message(int id, int next) {
 }
 
 static void enemy_turn(void) {
+  if (enemy_status == STATUS_SLEEP && (rnd(100) < 55)) {
+    return;
+  }
+  if (enemy_status == STATUS_POISON) {
+    wild_hp -= 3;
+  }
+
   int damage = species[wild_species].base_attack / 2 + 1;
+  if (enemy_status == STATUS_BURN) damage -= damage / 3;
+  if (battle_boost_turns > 0) {
+    damage += battle_boost;
+    battle_boost_turns--;
+  }
 
   player_hp -= damage;
 
@@ -689,6 +1073,21 @@ static void battle_fight(void) {
   Creature *c = &save_data.party[active];
 
   int damage = creature_attack(*c);
+  int multiplier = type_multiplier(
+    species_type(save_data.party[active].species),
+    species_type(wild_species)
+  );
+  damage = damage * multiplier / 100;
+  if (combat_status == STATUS_PARALYSIS && rnd(100) < 25) {
+    enemy_turn();
+    return;
+  }
+  if (combat_status == STATUS_BURN) {
+    damage -= damage / 4;
+  }
+  if (combat_status == STATUS_POISON) {
+    player_hp -= 2;
+  }
 
   wild_hp -= damage;
 
@@ -696,6 +1095,8 @@ static void battle_fight(void) {
     evolution_happened = add_experience(c, 5);
     save_data.stardust += 75 + wild_level * 10;
     save_data.coins += 10;
+    save_data.pokedollars += 20u;
+    add_player_experience(40u);
 
     save_game();
 
@@ -705,6 +1106,10 @@ static void battle_fight(void) {
     );
 
     return;
+  }
+
+  if (enemy_status == STATUS_OK && rnd(100) < 12) {
+    enemy_status = 1 + (int)rnd(4);
   }
 
   enemy_turn();
@@ -748,8 +1153,14 @@ static void battle_capture(void) {
     save_data.quest_catches =
       save_data.quest_catches < 100 ?
       (uint16_t)(save_data.quest_catches + 1) : 100;
+    if (save_data.captured >= 1) save_data.badges |= 1u << 0;
+    if (save_data.captured >= 10) save_data.badges |= 1u << 4;
+    if (save_data.captured >= 25) save_data.badges |= 1u << 6;
+    if (save_data.captured >= 50) save_data.badges |= 1u << 7;
     save_data.stardust += 100 + wild_level * 20;
     save_data.coins += 3;
+    save_data.pokedollars += 35u;
+    add_player_experience(60u);
 
     save_game();
 
@@ -809,18 +1220,26 @@ static void battle_action(void) {
     case 3:
       show_message(MSG_ESCAPE, SCREEN_WORLD);
       break;
+    case 4:
+      if (save_data.pokedollars >= 50) {
+        save_data.pokedollars -= 50;
+        battle_boost = 8;
+        battle_boost_turns = 3;
+      }
+      enemy_turn();
+      break;
   }
 }
 
 static void battle_input(uint64_t hit) {
   if (hit & KEY(eadk_key_left)) {
     battle_selection =
-      (battle_selection + 3) % 4;
+      (battle_selection + 4) % 5;
   }
 
   if (hit & KEY(eadk_key_right)) {
     battle_selection =
-      (battle_selection + 1) % 4;
+      (battle_selection + 1) % 5;
   }
 
   if (hit & KEY(eadk_key_back)) {
@@ -1043,13 +1462,14 @@ static void draw_title(void) {
 
   panel(65, 169, 190, 52);
 
-  choice(190, "New / Continue", true);
+  choice(183, "Continuer", selection == 0);
+  choice(207, "Nouvelle partie", selection == 1);
 
   gfx_text_center(
     &np_font_small,
     160,
     235,
-    "OK: play  Home: quit",
+    "OK: nouvelle partie  Back: reprendre",
     C_MUTED,
     256
   );
@@ -1184,7 +1604,16 @@ static void draw_world(void) {
   gfx_fill(158, 138, 3, 5, C_DARK);
   gfx_fill(164, 138, 3, 5, C_DARK);
 
-  header("POKEMON GO");
+  char world_header[40];
+  int r = region_id(player_x, player_y);
+  const char *rn = region_name(r);
+  int n = 0;
+  while (rn[n] && n < 38) {
+    world_header[n] = rn[n];
+    n++;
+  }
+  world_header[n] = 0;
+  header(world_header);
 
   gfx_text(
     &np_font_small,
@@ -1270,7 +1699,10 @@ static void draw_battle(void) {
     &np_font_small,
     16,
     65,
-    "Sauvage",
+    enemy_status == STATUS_BURN ? "Brule" :
+    enemy_status == STATUS_SLEEP ? "Endormi" :
+    enemy_status == STATUS_POISON ? "Empoisonne" :
+    enemy_status == STATUS_PARALYSIS ? "Paralyse" : "Sauvage",
     C_MUTED,
     256
   );
@@ -1312,15 +1744,16 @@ static void draw_battle(void) {
 
   panel(8, 176, 304, 56);
 
-  const char *options[4] = {
+  const char *options[5] = {
     "Attaque",
     "Capsule",
     "Potion",
-    "Fuite"
+    "Fuite",
+    "Capacite"
   };
 
-  for (int i = 0; i < 4; i++) {
-    int x = 47 + i * 75;
+  for (int i = 0; i < 5; i++) {
+    int x = 31 + i * 64;
 
     if (battle_selection == i) {
       gfx_rrect(
@@ -1437,20 +1870,20 @@ static void draw_dex(void) {
   header("POKEDEX");
 
   for (int i = 0; i < SPECIES_COUNT; i++) {
-    int col = i % 5;
-    int row = i / 5;
+    int col = i % 8;
+    int row = i / 8;
 
-    int x = 32 + col * 64;
-    int y = 62 + row * 55;
+    int x = 20 + col * 40;
+    int y = 48 + row * 24;
 
     panel(
-      x - 28,
-      y - 23,
-      56,
-      48
+      x - 16,
+      y - 15,
+      32,
+      31
     );
 
-    if (save_data.dex & (1u << i)) {
+    if (save_data.dex & ((uint64_t)1u << i)) {
       draw_creature(i, x, y - 5, 1);
 
       gfx_text_center(
@@ -1573,6 +2006,12 @@ static void draw_bag(void) {
   }
   gfx_text_right(&np_font_body, 272, 194, resources, C_YELLOW, 256);
 
+  gfx_text(&np_font_small, 48, 222, "Baies nourriture:",
+           C_MUTED, 256);
+  gfx_text_right(&np_font_small, 272, 222,
+                 save_data.berries ? "Disponible" : "Vide",
+                 C_GREEN, 256);
+
   gfx_text_center(
     &np_font_small,
     160,
@@ -1581,6 +2020,131 @@ static void draw_bag(void) {
     C_MUTED,
     256
   );
+}
+
+/* =========================================================
+   PROFIL
+   ========================================================= */
+
+static void draw_profile(void) {
+  gfx_vgrad(0, 0, SCREEN_W, SCREEN_H, 0x162B42, 0x101B2B);
+  header("PROFIL");
+
+  panel(18, 38, 284, 84);
+  gfx_circle(50, 80, 18, save_data.skin_style ? C_PURPLE : C_BLUE, 256);
+  gfx_circle(50, 76, 7, C_WHITE, 256);
+  gfx_fill(43, 86, 14, 18, C_GREEN);
+  gfx_text(&np_font_title, 82, 66, save_data.nickname, C_WHITE, 256);
+  gfx_text(&np_font_small, 82, 94,
+           save_data.player_level < 10 ? "Niveau 01+" : "Niveau",
+           C_YELLOW, 256);
+
+  panel(18, 132, 284, 48);
+  gfx_text(&np_font_body, 30, 158,
+           save_data.ball_style == 0 ? "Boule classique" :
+           save_data.ball_style == 1 ? "Boule etoilee" : "Boule legendaire",
+           C_WHITE, 256);
+  gfx_rrect(232, 143, 48, 24, 12,
+            save_data.ball_style == 2 ? C_YELLOW : C_RED, 256);
+  gfx_fill(232, 153, 48, 4, C_WHITE);
+
+  panel(18, 190, 284, 36);
+  char dollars[16];
+  dollars[0] = ' ';
+  dollars[1] = '0' + save_data.pokedollars / 1000;
+  dollars[2] = '0' + (save_data.pokedollars / 100) % 10;
+  dollars[3] = '0' + (save_data.pokedollars / 10) % 10;
+  dollars[4] = '0' + save_data.pokedollars % 10;
+  dollars[5] = ' ';
+  dollars[6] = 'P';
+  dollars[7] = '$';
+  dollars[8] = 0;
+  gfx_text_right(&np_font_body, 290, 213, dollars, C_YELLOW, 256);
+}
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+
+static void draw_badges(void) {
+  gfx_vgrad(0, 0, SCREEN_W, SCREEN_H, 0x162B42, 0x101B2B);
+  header("BADGES");
+
+  const char *names[8] = {
+    "Badge Feu", "Badge Eau", "Badge Plante", "Badge Roche",
+    "Badge Foudre", "Badge Glace", "Badge Dragon", "Badge Aero"
+  };
+
+  for (int i = 0; i < 8; i++) {
+    int col = i % 4;
+    int row = i / 4;
+    int x = 40 + col * 80;
+    int y = 82 + row * 78;
+    bool owned = save_data.badges & (1u << i);
+    gfx_circle(x, y, 24, owned ? C_YELLOW : C_MUTED,
+               owned ? 256 : 120);
+    gfx_circle(x, y, 15, owned ? C_BLUE : C_DARK, 256);
+    gfx_text_center(&np_font_small, x, y + 41,
+                    owned ? names[i] : "???", owned ? C_WHITE : C_MUTED, 256);
+  }
+
+  gfx_text_center(&np_font_small, 160, 235,
+                  "Badges selon les captures ou les arènes",
+                  C_MUTED, 256);
+}
+
+/* =========================================================
+   DUELLISTES BOT
+   ========================================================= */
+
+static void draw_bots(void) {
+  gfx_vgrad(0, 0, SCREEN_W, SCREEN_H, 0x162B42, 0x101B2B);
+  header("DUELLISTES");
+
+  const char *bots[4] = {"Nova", "Rex", "Akira", "Maelle"};
+  for (int i = 0; i < 4; i++) {
+    int y = 43 + i * 43;
+    panel(18, y, 284, 36);
+    gfx_circle(40, y + 18, 12, i == bot_selection ? C_YELLOW : C_BLUE, 256);
+    gfx_text(&np_font_body, 62, y + 22, bots[i], C_WHITE, 256);
+    gfx_text_right(&np_font_small, 290, y + 22,
+                   i < save_data.bot_wins ? "Vaincu" : "Pret",
+                   i < save_data.bot_wins ? C_GREEN : C_MUTED, 256);
+  }
+
+  gfx_text_center(&np_font_small, 160, 235,
+                  "OK: defier   Back: retour", C_MUTED, 256);
+}
+
+/* =========================================================
+   CAPACITES DE POKEMON
+   ========================================================= */
+
+static void draw_capabilities(void) {
+  gfx_vgrad(0, 0, SCREEN_W, SCREEN_H, 0x162B42, 0x101B2B);
+  header("CAPACITES");
+
+  const char *forms[10] = {
+    "X", "Y", "Z", "V", "VMAX", "EX", "Mega EX",
+    "Teracristal", "Gigamax", "Dynamax"
+  };
+  int active = active_creature();
+  int owned = active >= 0 ? save_data.dex &
+               ((uint64_t)1u << save_data.party[active].species) : 0;
+  for (int i = 0; i < 10; i++) {
+    int col = i % 2;
+    int row = i / 2;
+    int x = 18 + col * 146;
+    int y = 38 + row * 38;
+    panel(x, y, 140, 32);
+    gfx_text(&np_font_small, x + 12, y + 21, forms[i],
+             owned && i <= save_data.player_level / 5 ? C_YELLOW :
+             owned ? C_WHITE : C_MUTED, 256);
+  }
+
+  gfx_text_center(&np_font_small, 160, 235,
+                  "Achetables avec des Pokedollars",
+                  C_MUTED, 256);
 }
 
 /* =========================================================
@@ -1641,6 +2205,12 @@ static void draw_shop(void) {
   panel(18, 164, 284, 52);
   choice(190, "Pack explorateur - 200 pieces", selection == 2);
 
+  panel(18, 196, 284, 32);
+  choice(212, "Speciales X-Y-Z-V-EX", selection == 3);
+
+  panel(18, 228, 284, 24);
+  choice(240, "Baies - 40 pieces", selection == 4);
+
   gfx_text_center(&np_font_small, 160, 235,
                   save_data.coins >= 200 ? "Pieces disponibles: 200+" :
                   "Acheter avec les pieces", C_MUTED, 256);
@@ -1656,7 +2226,7 @@ static void draw_pause(void) {
     0x102B40, 0x101B2B
   );
 
-  panel(64, 30, 192, 202);
+  panel(64, 24, 192, 196);
 
   gfx_text_center(
     &np_font_title,
@@ -1667,13 +2237,15 @@ static void draw_pause(void) {
     256
   );
 
-  choice(82, "Reprendre", selection == 0);
-  choice(104, "Equipe", selection == 1);
-  choice(126, "Pokedex", selection == 2);
-  choice(148, "Sac", selection == 3);
-  choice(170, "Missions", selection == 4);
-  choice(192, "Boutique", selection == 5);
-  choice(214, "Quitter", selection == 6);
+  choice(50, "Reprendre", selection == 0);
+  choice(72, "Equipe", selection == 1);
+  choice(94, "Pokedex", selection == 2);
+  choice(116, "Sac", selection == 3);
+  choice(138, "Missions", selection == 4);
+  choice(160, "Boutique", selection == 5);
+  choice(182, "Profil", selection == 6);
+  choice(204, "Badges / Duels", selection == 7);
+  choice(216, "Quitter", selection == 8);
 }
 
 /* =========================================================
@@ -1803,6 +2375,22 @@ static void scene(void *ctx) {
       draw_shop();
       break;
 
+    case SCREEN_PROFILE:
+      draw_profile();
+      break;
+
+    case SCREEN_BADGES:
+      draw_badges();
+      break;
+
+    case SCREEN_BOTS:
+      draw_bots();
+      break;
+
+    case SCREEN_CAPABILITIES:
+      draw_capabilities();
+      break;
+
     case SCREEN_MESSAGE:
       draw_message();
       break;
@@ -1815,11 +2403,11 @@ static void scene(void *ctx) {
 
 static void pause_input(uint64_t hit) {
   if (hit & KEY(eadk_key_up)) {
-    selection = (selection + 6) % 7;
+    selection = (selection + 8) % 9;
   }
 
   if (hit & KEY(eadk_key_down)) {
-    selection = (selection + 1) % 7;
+    selection = (selection + 1) % 9;
   }
 
   if (hit & KEY(eadk_key_back)) {
@@ -1858,6 +2446,14 @@ static void pause_input(uint64_t hit) {
       break;
 
     case 6:
+      screen = SCREEN_PROFILE;
+      break;
+
+    case 7:
+      screen = SCREEN_BOTS;
+      break;
+
+    case 8:
       selection = 0;
       screen = SCREEN_CONFIRM;
       break;
@@ -1946,7 +2542,17 @@ int main(void) {
 
     /* TITRE */
     if (screen == SCREEN_TITLE) {
+      if (hit & (KEY(eadk_key_up) | KEY(eadk_key_left))) {
+        selection = 0;
+      }
+      if (hit & (KEY(eadk_key_down) | KEY(eadk_key_right))) {
+        selection = 1;
+      }
       if (ok) {
+        if (selection == 1) {
+          new_game();
+        }
+        selection = 0;
         screen = SCREEN_WORLD;
       }
     }
@@ -1983,7 +2589,11 @@ int main(void) {
       screen == SCREEN_DEX ||
       screen == SCREEN_BAG ||
       screen == SCREEN_QUESTS ||
-      screen == SCREEN_SHOP
+      screen == SCREEN_SHOP ||
+      screen == SCREEN_PROFILE ||
+      screen == SCREEN_BADGES ||
+      screen == SCREEN_BOTS ||
+      screen == SCREEN_CAPABILITIES
     ) {
       if (back) {
         screen = SCREEN_PAUSE;
@@ -1997,18 +2607,25 @@ int main(void) {
         save_data.quest_claimed = 1;
         save_data.stardust += 500;
         save_data.coins += 50;
+        save_data.pokedollars += 500;
+        add_player_experience(150);
         save_game();
       }
 
       if (screen == SCREEN_SHOP) {
         if (hit & KEY(eadk_key_up)) {
-          selection = (selection + 2) % 3;
+            selection = (selection + 4) % 5;
         }
         if (hit & KEY(eadk_key_down)) {
-          selection = (selection + 1) % 3;
+            selection = (selection + 1) % 5;
         }
         if (ok) {
-          if (selection == 0 && save_data.coins >= 100) {
+          if (selection == 4 && save_data.coins >= 40) {
+            save_data.coins -= 40;
+            save_data.berries += 5;
+          } else if (selection == 3) {
+            screen = SCREEN_CAPABILITIES;
+          } else if (selection == 0 && save_data.coins >= 100) {
             save_data.coins -= 100;
             save_data.balls += 10;
           } else if (selection == 1 && save_data.coins >= 80) {
@@ -2021,6 +2638,40 @@ int main(void) {
             save_data.stardust += 1000;
           }
           save_game();
+        }
+      }
+
+      if (screen == SCREEN_BOTS) {
+        if (hit & KEY(eadk_key_up)) {
+          bot_selection = (bot_selection + 3) % 4;
+        }
+        if (hit & KEY(eadk_key_down)) {
+          bot_selection = (bot_selection + 1) % 4;
+        }
+        if (ok) {
+          wild_species = 8 + bot_selection * 8;
+          if (wild_species >= SPECIES_COUNT) wild_species = 60;
+          wild_level = 8 + bot_selection * 3;
+          wild_hp = species[wild_species].base_hp + wild_level * 3;
+          int active = active_creature();
+          if (active >= 0) {
+            player_hp = creature_max_hp(save_data.party[active]);
+          }
+          combat_status = STATUS_OK;
+          enemy_status = STATUS_OK;
+          battle_selection = 0;
+          screen = SCREEN_BATTLE;
+        }
+      }
+
+      if (screen == SCREEN_PROFILE) {
+        if (hit & (KEY(eadk_key_left) | KEY(eadk_key_right))) {
+          if (save_data.pokedollars >= 100) {
+            save_data.pokedollars -= 100;
+            save_data.ball_style = (save_data.ball_style + 1) % 3;
+            save_data.skin_style = (save_data.skin_style + 1) % 3;
+            save_game();
+          }
         }
       }
     }
