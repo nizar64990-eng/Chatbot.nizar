@@ -58,4 +58,10 @@ La sauvegarde est stockee sous le nom `pokemongo.sav`.
 - Capacites X, Y, Z, V, VMAX, EX, Mega EX, Teracristal, Gigamax et Dynamax
 - Centres Pokemon, magasins, villes, PokeStops, baies et potions
 - Badges de captures et d'arènes
+- Raids multi-étoiles et combats de boss
+- Œufs, incubateurs et éclore selon la distance
+- Copain, coeurs, baies et cadeaux amis
+- Routes, recherches terrain et rencontres spéciales
+- Mode équipe, photographie, échanges bot et clubs
+- PV, niveaux, types, météo, saisons et progression hors ligne
 - Sauvegarde locale avec verification par checksum

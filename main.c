@@ -126,6 +126,19 @@ typedef struct __attribute__((packed)) {
   uint16_t badges;
   uint16_t bot_wins;
   char nickname[12];
+  uint8_t team;
+  uint8_t egg_type;
+  uint16_t egg_distance;
+  uint16_t egg_target;
+  uint8_t buddy_species;
+  uint16_t buddy_hearts;
+  uint8_t gifts;
+  uint8_t raid_tier;
+  uint8_t raid_wins;
+  uint8_t photos;
+  uint8_t routes;
+  uint8_t trades;
+  uint8_t research_points;
 
   Creature party[PARTY_MAX];
 
@@ -588,6 +601,15 @@ enum {
   SCREEN_BADGES,
   SCREEN_BOTS,
   SCREEN_CAPABILITIES,
+  SCREEN_RAIDS,
+  SCREEN_EGGS,
+  SCREEN_BUDDY,
+  SCREEN_GIFTS,
+  SCREEN_ROUTES,
+  SCREEN_RESEARCH,
+  SCREEN_PHOTOS,
+  SCREEN_TEAM,
+  SCREEN_TRADING,
   SCREEN_MESSAGE
 };
 
@@ -712,7 +734,7 @@ static int active_creature(void) {
 
 static void save_game(void) {
   save_data.magic = 0x4352474Fu;
-  save_data.version = 3;
+  save_data.version = 4;
 
   save_data.world_x = (int16_t)player_x;
   save_data.world_y = (int16_t)player_y;
@@ -761,7 +783,7 @@ static bool load_game(void) {
   );
 
   if (candidate.magic != 0x4352474Fu ||
-      candidate.version != 3 ||
+      candidate.version != 4 ||
       candidate.party_count > PARTY_MAX ||
       stored_checksum != calculated) {
     return false;
@@ -804,6 +826,19 @@ static void new_game(void) {
   save_data.quest_steps = 0;
   save_data.quest_claimed = 0;
   save_data.berries = 5;
+  save_data.team = 0;
+  save_data.egg_type = 2;
+  save_data.egg_distance = 0;
+  save_data.egg_target = 2;
+  save_data.buddy_species = 0;
+  save_data.buddy_hearts = 0;
+  save_data.gifts = 3;
+  save_data.raid_tier = 1;
+  save_data.raid_wins = 0;
+  save_data.photos = 0;
+  save_data.routes = 0;
+  save_data.trades = 0;
+  save_data.research_points = 0;
   save_data.player_xp = 0;
   save_data.player_level = 1;
   save_data.pokedollars = 500;
@@ -991,6 +1026,15 @@ static void move_player(int dx, int dy) {
   save_data.quest_steps =
     save_data.quest_steps < 100 ? (uint16_t)(save_data.quest_steps + 1) : 100;
   save_data.distance++;
+  if (save_data.egg_type && save_data.egg_distance < save_data.egg_target) {
+    save_data.egg_distance++;
+  }
+  if (save_data.egg_distance >= save_data.egg_target && save_data.egg_type) {
+    save_data.egg_type = 0;
+    save_data.captured++;
+    save_data.pokedollars += 150;
+    save_data.stardust += 500;
+  }
 
   if (rnd(100) < 13) {
     start_battle();
@@ -1025,6 +1069,7 @@ static void spin_pokestop(void) {
   save_data.balls += 3;
   save_data.potions += 1;
   save_data.stardust += 150;
+  save_data.gifts = save_data.gifts < 20 ? (uint8_t)(save_data.gifts + 1) : 20;
   save_game();
   show_message(MSG_HEAL, SCREEN_WORLD);
 }
@@ -1097,6 +1142,9 @@ static void battle_fight(void) {
     save_data.coins += 10;
     save_data.pokedollars += 20u;
     add_player_experience(40u);
+    save_data.research_points =
+      save_data.research_points < 255 ?
+      (uint8_t)(save_data.research_points + 1) : 255;
 
     save_game();
 
@@ -2148,6 +2196,219 @@ static void draw_capabilities(void) {
 }
 
 /* =========================================================
+   RAIDS
+   ========================================================= */
+
+static void draw_raids(void) {
+  gfx_vgrad(0, 0, SCREEN_W, SCREEN_H, 0x162B42, 0x101B2B);
+  header("RAIDS");
+
+  panel(18, 42, 284, 70);
+  gfx_text(&np_font_title, 30, 70, "Raid 5*", C_YELLOW, 256);
+  gfx_text(&np_font_small, 30, 96,
+           save_data.raid_wins ? "Arène vaincue" : "Puissant boss disponible",
+           C_WHITE, 256);
+
+  panel(18, 122, 284, 60);
+  gfx_text(&np_font_body, 30, 145, "Equipe recommandée",
+           C_WHITE, 256);
+  gfx_text_right(&np_font_small, 290, 165,
+                 save_data.team ? "Equipe 2" : "Equipe 1",
+                 C_BLUE, 256);
+
+  gfx_text_center(&np_font_small, 160, 235,
+                  "OK: commencer   Back: retour", C_MUTED, 256);
+}
+
+/* =========================================================
+   OEUFS
+   ========================================================= */
+
+static void draw_eggs(void) {
+  gfx_vgrad(0, 0, SCREEN_W, SCREEN_H, 0x162B42, 0x101B2B);
+  header("INCUBATEUR");
+
+  panel(18, 45, 284, 88);
+  gfx_circle(58, 89, 30, C_WHITE, 256);
+  gfx_circle(58, 89, 21, C_YELLOW, 256);
+  gfx_circle(58, 89, 7, C_WHITE, 256);
+
+  if (save_data.egg_type) {
+    gfx_text(&np_font_body, 105, 72, "Oeuf rare", C_WHITE, 256);
+    gfx_fill(105, 93, 180, 8, C_DARK);
+    gfx_fill(105, 93,
+             clamp(save_data.egg_distance * 180 / save_data.egg_target, 0, 180),
+             8, C_GREEN);
+    gfx_text(&np_font_small, 105, 116, "Distance",
+             C_MUTED, 256);
+  } else {
+    gfx_text(&np_font_body, 105, 90, "Oeuf eclos", C_YELLOW, 256);
+  }
+
+  gfx_text_center(&np_font_small, 160, 235,
+                  "Marche avec l'oeuf actif", C_MUTED, 256);
+}
+
+/* =========================================================
+   COPAIN
+   ========================================================= */
+
+static void draw_buddy(void) {
+  gfx_vgrad(0, 0, SCREEN_W, SCREEN_H, 0x162B42, 0x101B2B);
+  header("COPAIN");
+
+  panel(18, 42, 284, 92);
+  draw_creature(save_data.buddy_species, 58, 88, 2);
+  gfx_text(&np_font_body, 108, 72,
+           species[save_data.buddy_species].name, C_WHITE, 256);
+  gfx_text(&np_font_small, 108, 94, "Coeurs: ",
+           C_MUTED, 256);
+  for (int i = 0; i < 10; i++) {
+    gfx_circle(108 + i * 16, 108, i < save_data.buddy_hearts ? 5 : 3,
+               i < save_data.buddy_hearts ? C_RED : C_MUTED, 256);
+  }
+
+  gfx_text_center(&np_font_small, 160, 235,
+                  "OK: donner baie   Back: retour", C_MUTED, 256);
+}
+
+/* =========================================================
+   CADEAUX
+   ========================================================= */
+
+static void draw_gifts(void) {
+  gfx_vgrad(0, 0, SCREEN_W, SCREEN_H, 0x162B42, 0x101B2B);
+  header("CADEAUX");
+
+  panel(18, 42, 284, 48);
+  gfx_text(&np_font_body, 30, 72, "Cadeaux amis",
+           C_WHITE, 256);
+  gfx_text_right(&np_font_title, 290, 76, save_data.gifts ? "3" : "0",
+                 C_YELLOW, 256);
+
+  panel(18, 100, 284, 48);
+  gfx_text(&np_font_body, 30, 130, "Cartes postales",
+           C_WHITE, 256);
+  gfx_text_right(&np_font_body, 290, 130, "12", C_BLUE, 256);
+
+  gfx_text_center(&np_font_small, 160, 235,
+                  "OK: ouvrir cadeau", C_MUTED, 256);
+}
+
+/* =========================================================
+   ROUTES
+   ========================================================= */
+
+static void draw_routes(void) {
+  gfx_vgrad(0, 0, SCREEN_W, SCREEN_H, 0x162B42, 0x101B2B);
+  header("ROUTES");
+
+  for (int i = 0; i < 4; i++) {
+    int y = 42 + i * 46;
+    panel(18, y, 284, 38);
+    gfx_circle(42, y + 19, 10, i == selection ? C_YELLOW : C_GREEN, 256);
+    gfx_text(&np_font_body, 64, y + 23,
+             i == 0 ? "Boucle de la ville" :
+             i == 1 ? "Sentier du lac" :
+             i == 2 ? "Route des dunes" : "Chemin legendaire",
+             C_WHITE, 256);
+  }
+
+  gfx_text_center(&np_font_small, 160, 235,
+                  "OK: enregistrer la route", C_MUTED, 256);
+}
+
+/* =========================================================
+   RECHERCHES
+   ========================================================= */
+
+static void draw_research(void) {
+  gfx_vgrad(0, 0, SCREEN_W, SCREEN_H, 0x162B42, 0x101B2B);
+  header("RECHERCHE");
+
+  panel(18, 42, 284, 64);
+  gfx_text(&np_font_body, 30, 66, "Recherche terrain",
+           C_WHITE, 256);
+  gfx_fill(30, 78, 260, 7, C_DARK);
+  gfx_fill(30, 78,
+           clamp(save_data.research_points * 260 / 7, 0, 260),
+           7, C_PURPLE);
+
+  panel(18, 116, 284, 64);
+  gfx_text(&np_font_body, 30, 140, "Rencontre speciale",
+           C_WHITE, 256);
+  gfx_text_right(&np_font_small, 290, 140,
+                 save_data.research_points >= 7 ? "Disponible" : "En cours",
+                 C_YELLOW, 256);
+
+  gfx_text_center(&np_font_small, 160, 235,
+                  "Recompense apres 7 recherches", C_MUTED, 256);
+}
+
+/* =========================================================
+   PHOTOS
+   ========================================================= */
+
+static void draw_photos(void) {
+  gfx_vgrad(0, 0, SCREEN_W, SCREEN_H, 0x162B42, 0x101B2B);
+  header("APPAREIL");
+
+  gfx_rrect(22, 42, 276, 150, 14, HEX(0x244F63), 256);
+  if (save_data.party_count) {
+    draw_creature(save_data.party[0].species, 160, 105, 3);
+  }
+  gfx_circle(284, 62, 9, C_RED, 256);
+  gfx_text(&np_font_small, 34, 211,
+           save_data.photos ? "Derniere photo sauvegardee" : "Mode photo",
+           C_WHITE, 256);
+  gfx_text_center(&np_font_small, 160, 235,
+                  "OK: prendre une photo", C_MUTED, 256);
+}
+
+/* =========================================================
+   EQUIPES
+   ========================================================= */
+
+static void draw_team(void) {
+  gfx_vgrad(0, 0, SCREEN_W, SCREEN_H, 0x162B42, 0x101B2B);
+  header("EQUIPE");
+
+  const char *teams[3] = {"Equipe Saphir", "Equipe Rubis", "Equipe Emeraude"};
+  const color_t colors[3] = {C_BLUE, C_RED, C_GREEN};
+  for (int i = 0; i < 3; i++) {
+    int y = 58 + i * 55;
+    panel(18, y, 284, 44);
+    gfx_circle(46, y + 22, 14,
+               i == save_data.team ? C_YELLOW : colors[i], 256);
+    gfx_text(&np_font_body, 72, y + 27, teams[i], C_WHITE, 256);
+  }
+
+  gfx_text_center(&np_font_small, 160, 235,
+                  "OK: choisir une equipe", C_MUTED, 256);
+}
+
+/* =========================================================
+   ECHANGE
+   ========================================================= */
+
+static void draw_trading(void) {
+  gfx_vgrad(0, 0, SCREEN_W, SCREEN_H, 0x162B42, 0x101B2B);
+  header("ECHANGE");
+
+  panel(18, 42, 284, 70);
+  gfx_text(&np_font_title, 30, 70, "Partenaire bot", C_YELLOW, 256);
+  gfx_text(&np_font_small, 30, 96,
+           "Pokemon hors liste disponible", C_WHITE, 256);
+
+  panel(18, 122, 284, 58);
+  gfx_text(&np_font_body, 30, 150, "Amity / distance",
+           C_WHITE, 256);
+
+  gfx_text_center(&np_font_small, 160, 235,
+                  "OK: proposer un echange", C_MUTED, 256);
+}
+
+/* =========================================================
    QUETES
    ========================================================= */
 
@@ -2226,7 +2487,7 @@ static void draw_pause(void) {
     0x102B40, 0x101B2B
   );
 
-  panel(64, 24, 192, 196);
+  panel(8, 24, 304, 196);
 
   gfx_text_center(
     &np_font_title,
@@ -2237,15 +2498,25 @@ static void draw_pause(void) {
     256
   );
 
-  choice(50, "Reprendre", selection == 0);
-  choice(72, "Equipe", selection == 1);
-  choice(94, "Pokedex", selection == 2);
-  choice(116, "Sac", selection == 3);
-  choice(138, "Missions", selection == 4);
-  choice(160, "Boutique", selection == 5);
-  choice(182, "Profil", selection == 6);
-  choice(204, "Badges / Duels", selection == 7);
-  choice(216, "Quitter", selection == 8);
+  const char *pause_items[18] = {
+    "Reprendre", "Equipe", "Pokedex", "Sac", "Missions",
+    "Boutique", "Profil", "Badges", "Capacites",
+    "Raids", "Oeufs", "Copain", "Cadeaux", "Routes",
+    "Recherche", "Photos", "Equipes", "Echange"
+  };
+
+  for (int i = 0; i < 18; i++) {
+    int col = i % 3;
+    int row = i / 3;
+    int x = 54 + col * 98;
+    int y = 82 + row * 38;
+    if (i == selection) {
+      gfx_rrect(x - 42, y - 16, 84, 27, 7, C_YELLOW, 256);
+    }
+    gfx_text_center(&np_font_small, x, y,
+                    pause_items[i],
+                    i == selection ? C_DARK : C_WHITE, 256);
+  }
 }
 
 /* =========================================================
@@ -2391,6 +2662,42 @@ static void scene(void *ctx) {
       draw_capabilities();
       break;
 
+    case SCREEN_RAIDS:
+      draw_raids();
+      break;
+
+    case SCREEN_EGGS:
+      draw_eggs();
+      break;
+
+    case SCREEN_BUDDY:
+      draw_buddy();
+      break;
+
+    case SCREEN_GIFTS:
+      draw_gifts();
+      break;
+
+    case SCREEN_ROUTES:
+      draw_routes();
+      break;
+
+    case SCREEN_RESEARCH:
+      draw_research();
+      break;
+
+    case SCREEN_PHOTOS:
+      draw_photos();
+      break;
+
+    case SCREEN_TEAM:
+      draw_team();
+      break;
+
+    case SCREEN_TRADING:
+      draw_trading();
+      break;
+
     case SCREEN_MESSAGE:
       draw_message();
       break;
@@ -2403,11 +2710,11 @@ static void scene(void *ctx) {
 
 static void pause_input(uint64_t hit) {
   if (hit & KEY(eadk_key_up)) {
-    selection = (selection + 8) % 9;
+    selection = (selection + 17) % 18;
   }
 
   if (hit & KEY(eadk_key_down)) {
-    selection = (selection + 1) % 9;
+    selection = (selection + 1) % 18;
   }
 
   if (hit & KEY(eadk_key_back)) {
@@ -2450,12 +2757,47 @@ static void pause_input(uint64_t hit) {
       break;
 
     case 7:
-      screen = SCREEN_BOTS;
+      screen = SCREEN_BADGES;
       break;
 
     case 8:
-      selection = 0;
-      screen = SCREEN_CONFIRM;
+      screen = SCREEN_CAPABILITIES;
+      break;
+
+    case 9:
+      screen = SCREEN_RAIDS;
+      break;
+
+    case 10:
+      screen = SCREEN_EGGS;
+      break;
+
+    case 11:
+      screen = SCREEN_BUDDY;
+      break;
+
+    case 12:
+      screen = SCREEN_GIFTS;
+      break;
+
+    case 13:
+      screen = SCREEN_ROUTES;
+      break;
+
+    case 14:
+      screen = SCREEN_RESEARCH;
+      break;
+
+    case 15:
+      screen = SCREEN_PHOTOS;
+      break;
+
+    case 16:
+      screen = SCREEN_TEAM;
+      break;
+
+    case 17:
+      screen = SCREEN_TRADING;
       break;
   }
 }
@@ -2593,7 +2935,16 @@ int main(void) {
       screen == SCREEN_PROFILE ||
       screen == SCREEN_BADGES ||
       screen == SCREEN_BOTS ||
-      screen == SCREEN_CAPABILITIES
+      screen == SCREEN_CAPABILITIES ||
+      screen == SCREEN_RAIDS ||
+      screen == SCREEN_EGGS ||
+      screen == SCREEN_BUDDY ||
+      screen == SCREEN_GIFTS ||
+      screen == SCREEN_ROUTES ||
+      screen == SCREEN_RESEARCH ||
+      screen == SCREEN_PHOTOS ||
+      screen == SCREEN_TEAM ||
+      screen == SCREEN_TRADING
     ) {
       if (back) {
         screen = SCREEN_PAUSE;
@@ -2672,6 +3023,81 @@ int main(void) {
             save_data.skin_style = (save_data.skin_style + 1) % 3;
             save_game();
           }
+        }
+      }
+
+      if (screen == SCREEN_RAIDS && ok) {
+        if (save_data.raid_wins < 255) save_data.raid_wins++;
+        save_data.pokedollars += 1000;
+        save_data.stardust += 2000;
+        add_player_experience(300);
+        save_data.badges |= 1u << 5;
+        save_game();
+      }
+
+      if (screen == SCREEN_EGGS && ok) {
+        if (!save_data.egg_type) {
+          save_data.egg_type = 1;
+          save_data.egg_distance = 0;
+          save_data.egg_target = 5;
+          save_game();
+        }
+      }
+
+      if (screen == SCREEN_BUDDY && ok && save_data.berries) {
+        save_data.berries--;
+        if (save_data.buddy_hearts < 10) save_data.buddy_hearts++;
+        add_player_experience(20);
+        save_game();
+      }
+
+      if (screen == SCREEN_GIFTS && ok && save_data.gifts) {
+        save_data.gifts--;
+        save_data.pokedollars += 100;
+        save_data.stardust += 100;
+        save_game();
+      }
+
+      if (screen == SCREEN_ROUTES) {
+        if (hit & KEY(eadk_key_up)) selection = (selection + 3) % 4;
+        if (hit & KEY(eadk_key_down)) selection = (selection + 1) % 4;
+        if (ok) {
+          save_data.routes++;
+          save_data.pokedollars += 80;
+          add_player_experience(50);
+          save_game();
+        }
+      }
+
+      if (screen == SCREEN_RESEARCH && ok &&
+          save_data.research_points >= 7) {
+        save_data.research_points = 0;
+        save_data.pokedollars += 500;
+        save_data.stardust += 1000;
+        save_game();
+      }
+
+      if (screen == SCREEN_PHOTOS && ok) {
+        save_data.photos++;
+        save_data.pokedollars += 50;
+        save_game();
+      }
+
+      if (screen == SCREEN_TEAM) {
+        if (hit & KEY(eadk_key_up)) selection = (selection + 2) % 3;
+        if (hit & KEY(eadk_key_down)) selection = (selection + 1) % 3;
+        if (ok) {
+          save_data.team = (uint8_t)selection;
+          save_game();
+        }
+      }
+
+      if (screen == SCREEN_TRADING && ok) {
+        if (save_data.party_count > 1) {
+          save_data.trades++;
+          save_data.pokedollars += 250;
+          add_player_experience(100);
+          save_game();
         }
       }
     }
